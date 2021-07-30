@@ -1,0 +1,21 @@
+Actor FF_Imp : ZombieMan
+{
+	Health 8
+	Radius 16
+	States
+	{
+		Spawn:
+			POSS A 0
+			POSS A 1 ACS_ExecuteAlways(8,0,4)
+			Goto Super::Spawn
+		Death:
+		XDeath:
+			POSS H 5 A_GiveToTarget("Exp", 6)
+			POSS H 5 A_GiveToTarget("Gold", 6)
+			POSS I 5 A_Scream
+			POSS J 5 A_NoBlocking
+			POSS K 5
+			POSS L -1
+			Stop
+	}
+}

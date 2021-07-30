@@ -1,0 +1,41 @@
+gameinfo
+{
+	titlemusic = "title"
+	creditpage = "TITLEPIC"
+	infopage = "TITLEPIC"
+	advisorytime = 0
+	quitmessages = "Are you sure you want to quit?"
+}
+
+clearskills
+skill FinalFantasy
+{
+	Name = "Final Fantasy"
+	SpawnFilter = Hard
+}
+
+clearepisodes
+episode MAP01
+{
+	name = "Final Fantasy"
+	key = "f"
+}
+
+cluster 1
+{
+	hub
+}
+
+map MAP01 "World"
+{
+	cluster = 1
+	music = "world"
+	sky1 = "SKY"
+}
+
+map MAP02 "Coneria Town"
+{
+	cluster = 1
+	music = "town"
+	sky1 = "SKY"
+}

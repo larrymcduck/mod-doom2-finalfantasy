@@ -1,0 +1,434 @@
+Actor FF1_HeroClass : PlayerPawn
+{
+	Height 64
+	Radius 16
+	DamageFactor "Undead", 0
+}
+
+Actor FF1_FighterClass : FF1_HeroClass
+{
+	Speed 1
+	PainSound "FF1_FighterPain"
+	
+	Health 35
+	Player.MaxHealth 35
+	
+	//Player.ForwardMove 1, 1
+	//Player.SideMove 1, 1
+	Player.ForwardMove 4, 4
+	Player.SideMove 4, 4
+	Player.DisplayName "Fighter"
+	Player.SoundClass "FF1_Fighter"
+	Player.ColorRange 112, 127
+
+	Player.WeaponSlot 1, FF_Unarmed,FF_WoodenStaff,FF_SmallDagger,FF_Rapier,FF_IronHammer
+		
+	Player.StartItem "Gold",100
+	Player.StartItem "Level",1
+	Player.StartItem "IsFighter",1
+	Player.StartItem "FF_Unarmed",1
+	Player.StartItem "FF_UnarmedInventory",1
+	Player.StartItem "FF_NoOffHand",1
+	Player.StartItem "FF_NoArmor",1
+	Player.StartItem "FF_NoHelm",1
+	Player.StartItem "FF_NoAcc",1
+	
+	Player.StartItem "STR",20
+	Player.StartItem "AGL",5
+	Player.StartItem "INT",1
+	Player.StartItem "VIT",10
+	Player.StartItem "LUCK",5
+
+	Player.StartItem "MaxHpItem",35
+	Player.StartItem "HeroDamage",10
+	Player.StartItem "HeroHit",10
+	Player.StartItem "HeroAbsorb",0
+
+	States
+	{
+		Spawn:
+			PLAY A -1
+			loop
+		See:
+			PLAY ABCD 4
+			loop
+		Missile:
+			PLAY E 12 Bright
+			Goto Spawn
+		Melee:
+			PLAY F 6
+			Goto Missile
+		Pain:
+			PLAY G 8 A_Pain
+			Goto Spawn
+		Death:
+			PLAY H 10
+			PLAY I 10 A_PlayerScream
+			PLAY J 10 A_NoBlocking
+			PLAY KLM 10
+			PLAY N -1
+			Stop
+		XDeath:
+			PLAY O 5
+			PLAY P 5 A_XScream
+			PLAY Q 5 A_NoBlocking
+			PLAY RSTUV 5
+			PLAY W -1
+			Stop
+	}
+}
+
+Actor FF1_ThiefClass : FF1_HeroClass
+{
+	Speed 1
+	PainSound "FF1_ThiefPain"
+	
+	Health 35
+	Player.MaxHealth 35
+
+	Player.ForwardMove 1, 1
+	Player.SideMove 1, 1
+	Player.DisplayName "Thief"
+	Player.SoundClass "FF1_Thief"
+	Player.ColorRange 112, 127
+
+	Player.WeaponSlot 1, FF_Unarmed,FF_SmallDagger,FF_Rapier
+	
+	Player.StartItem "Gold",100
+	Player.StartItem "Level",1
+	Player.StartItem "IsThief",1
+	Player.StartItem "FF_Unarmed",1
+	Player.StartItem "FF_UnarmedInventory",1
+	Player.StartItem "FF_NoOffHand",1
+	Player.StartItem "FF_NoArmor",1
+	Player.StartItem "FF_NoHelm",1
+	Player.StartItem "FF_NoAcc",1
+
+	Player.StartItem "STR",5
+	Player.StartItem "AGL",10
+	Player.StartItem "INT",5
+	Player.StartItem "VIT",5
+	Player.StartItem "LUCK",15
+	
+	Player.StartItem "MaxHpItem",35
+	Player.StartItem "HeroDamage",2
+	Player.StartItem "HeroHit",5
+	Player.StartItem "HeroAbsorb",0
+	
+	States
+	{
+		Spawn:
+			PLAY A -1
+			loop
+		See:
+			PLAY ABCD 4
+			loop
+		Missile:
+			PLAY E 12 Bright
+			Goto Spawn
+		Melee:
+			PLAY F 6
+			Goto Missile
+		Pain:
+			PLAY G 8 A_Pain
+			Goto Spawn
+		Death:
+			PLAY H 10
+			PLAY I 10 A_PlayerScream
+			PLAY J 10 A_NoBlocking
+			PLAY KLM 10
+			PLAY N -1
+			Stop
+		XDeath:
+			PLAY O 5
+			PLAY P 5 A_XScream
+			PLAY Q 5 A_NoBlocking
+			PLAY RSTUV 5
+			PLAY W -1
+			Stop
+	}
+}
+
+Actor FF1_BlackBeltClass : FF1_HeroClass
+{
+	Speed 1
+	PainSound "FF1_BlackBeltPain"
+	
+	Health 33
+	Player.MaxHealth 33
+
+	Player.ForwardMove 1, 1
+	Player.SideMove 1, 1
+	Player.DisplayName "Black Belt"
+	Player.SoundClass "FF1_BlackBelt"
+	Player.ColorRange 112, 127
+
+	Player.WeaponSlot 1, FF_Unarmed,FF_WoodenNunchuck
+	
+	Player.StartItem "Gold",100
+	Player.StartItem "Level",1
+	Player.StartItem "IsBlackBelt",1
+	Player.StartItem "FF_Unarmed",1
+	Player.StartItem "FF_UnarmedInventory",1
+	Player.StartItem "FF_NoOffHand",1
+	Player.StartItem "FF_NoArmor",1
+	Player.StartItem "FF_NoHelm",1
+	Player.StartItem "FF_NoAcc",1
+
+	Player.StartItem "STR",5
+	Player.StartItem "AGL",5
+	Player.StartItem "INT",5
+	Player.StartItem "VIT",20
+	Player.StartItem "LUCK",5
+	
+	Player.StartItem "MaxHpItem",33
+	Player.StartItem "HeroDamage",2
+	Player.StartItem "HeroHit",5
+	Player.StartItem "HeroAbsorb",0
+	
+	States
+	{
+		Spawn:
+			PLAY A -1
+			loop
+		See:
+			PLAY ABCD 4
+			loop
+		Missile:
+			PLAY E 12 Bright
+			Goto Spawn
+		Melee:
+			PLAY F 6
+			Goto Missile
+		Pain:
+			PLAY G 8 A_Pain
+			Goto Spawn
+		Death:
+			PLAY H 10
+			PLAY I 10 A_PlayerScream
+			PLAY J 10 A_NoBlocking
+			PLAY KLM 10
+			PLAY N -1
+			Stop
+		XDeath:
+			PLAY O 5
+			PLAY P 5 A_XScream
+			PLAY Q 5 A_NoBlocking
+			PLAY RSTUV 5
+			PLAY W -1
+			Stop
+	}
+}
+
+Actor FF1_RedMageClass : FF1_HeroClass
+{
+	Speed 1
+	PainSound "FF1_RedMagePain"
+	
+	Health 30
+	Player.MaxHealth 30
+
+	Player.ForwardMove 1, 1
+	Player.SideMove 1, 1
+	Player.DisplayName "Red Mage"
+	Player.SoundClass "FF1_RedMage"
+	Player.ColorRange 112, 127
+
+	Player.WeaponSlot 1, FF_Unarmed,FF_SmallDagger,FF_Rapier
+	
+	Player.StartItem "Gold",100
+	Player.StartItem "Level",1
+	Player.StartItem "IsRedMage",1
+	Player.StartItem "FF_Unarmed",1
+	Player.StartItem "FF_UnarmedInventory",1
+	Player.StartItem "FF_NoOffHand",1
+	Player.StartItem "FF_NoArmor",1
+	Player.StartItem "FF_NoHelm",1
+	Player.StartItem "FF_NoAcc",1
+
+	Player.StartItem "STR",10
+	Player.StartItem "AGL",10
+	Player.StartItem "INT",10
+	Player.StartItem "VIT",5
+	Player.StartItem "LUCK",5
+	
+	Player.StartItem "MaxHpItem",30
+	Player.StartItem "HeroDamage",5
+	Player.StartItem "HeroHit",7
+	Player.StartItem "HeroAbsorb",0
+	
+	States
+	{
+		Spawn:
+			PLAY A -1
+			loop
+		See:
+			PLAY ABCD 4
+			loop
+		Missile:
+			PLAY E 12 Bright
+			Goto Spawn
+		Melee:
+			PLAY F 6
+			Goto Missile
+		Pain:
+			PLAY G 8 A_Pain
+			Goto Spawn
+		Death:
+			PLAY H 10
+			PLAY I 10 A_PlayerScream
+			PLAY J 10 A_NoBlocking
+			PLAY KLM 10
+			PLAY N -1
+			Stop
+		XDeath:
+			PLAY O 5
+			PLAY P 5 A_XScream
+			PLAY Q 5 A_NoBlocking
+			PLAY RSTUV 5
+			PLAY W -1
+			Stop
+	}
+}
+
+Actor FF1_WhiteMageClass : FF1_HeroClass
+{
+	Speed 1
+	PainSound "FF1_WhiteMagePain"
+	
+	Health 28
+	Player.MaxHealth 28
+
+	Player.ForwardMove 1, 1
+	Player.SideMove 1, 1
+	Player.DisplayName "White Mage"
+	Player.SoundClass "FF1_WhiteMage"
+	Player.ColorRange 112, 127
+
+	Player.WeaponSlot 1, FF_Unarmed,FF_WoodenStaff,FF_IronHammer
+	
+	Player.StartItem "Gold",100
+	Player.StartItem "Level",1
+	Player.StartItem "IsWhiteMage",1
+	Player.StartItem "FF_Unarmed",1
+	Player.StartItem "FF_UnarmedInventory",1
+	Player.StartItem "FF_NoOffHand",1
+	Player.StartItem "FF_NoArmor",1
+	Player.StartItem "FF_NoHelm",1
+	Player.StartItem "FF_NoAcc",1
+
+	Player.StartItem "STR",5
+	Player.StartItem "AGL",5
+	Player.StartItem "INT",15
+	Player.StartItem "VIT",10
+	Player.StartItem "LUCK",5
+	
+	Player.StartItem "MaxHpItem",28
+	Player.StartItem "HeroDamage",2
+	Player.StartItem "HeroHit",5
+	Player.StartItem "HeroAbsorb",0
+	
+	States
+	{
+		Spawn:
+			PLAY A -1
+			loop
+		See:
+			PLAY ABCD 4
+			loop
+		Missile:
+			PLAY E 12 Bright
+			Goto Spawn
+		Melee:
+			PLAY F 6
+			Goto Missile
+		Pain:
+			PLAY G 8 A_Pain
+			Goto Spawn
+		Death:
+			PLAY H 10
+			PLAY I 10 A_PlayerScream
+			PLAY J 10 A_NoBlocking
+			PLAY KLM 10
+			PLAY N -1
+			Stop
+		XDeath:
+			PLAY O 5
+			PLAY P 5 A_XScream
+			PLAY Q 5 A_NoBlocking
+			PLAY RSTUV 5
+			PLAY W -1
+			Stop
+	}
+}
+
+Actor FF1_BlackMageClass : FF1_HeroClass
+{
+	Speed 1
+	PainSound "FF1_BlackMagePain"
+	
+	Health 25
+	Player.MaxHealth 25
+
+	Player.ForwardMove 1, 1
+	Player.SideMove 1, 1
+	Player.DisplayName "Black Mage"
+	Player.SoundClass "FF1_BlackMage"
+	Player.ColorRange 112, 127
+
+	Player.WeaponSlot 1, FF_Unarmed,FF_SmallDagger
+	
+	Player.StartItem "Gold",100
+	Player.StartItem "Level",1
+	Player.StartItem "IsBlackMage",1
+	Player.StartItem "FF_Unarmed",1
+	Player.StartItem "FF_UnarmedInventory",1
+	Player.StartItem "FF_NoOffHand",1
+	Player.StartItem "FF_NoArmor",1
+	Player.StartItem "FF_NoHelm",1
+	Player.StartItem "FF_NoAcc",1
+
+	Player.StartItem "STR",1
+	Player.StartItem "AGL",10
+	Player.StartItem "INT",20
+	Player.StartItem "VIT",1
+	Player.StartItem "LUCK",10
+	
+	Player.StartItem "MaxHpItem",25
+	Player.StartItem "HeroDamage",1
+	Player.StartItem "HeroHit",5
+	Player.StartItem "HeroAbsorb",0
+	
+	States
+	{
+		Spawn:
+			PLAY A -1
+			loop
+		See:
+			PLAY ABCD 4
+			loop
+		Missile:
+			PLAY E 12 Bright
+			Goto Spawn
+		Melee:
+			PLAY F 6
+			Goto Missile
+		Pain:
+			PLAY G 8 A_Pain
+			Goto Spawn
+		Death:
+			PLAY H 10
+			PLAY I 10 A_PlayerScream
+			PLAY J 10 A_NoBlocking
+			PLAY KLM 10
+			PLAY N -1
+			Stop
+		XDeath:
+			PLAY O 5
+			PLAY P 5 A_XScream
+			PLAY Q 5 A_NoBlocking
+			PLAY RSTUV 5
+			PLAY W -1
+			Stop
+	}
+}

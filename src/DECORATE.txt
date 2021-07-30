@@ -1,0 +1,4 @@
+#include "HeroClasses.txt"
+#include "Items.txt"
+#include "Replace.txt"
+#include "Monsters.txt"

@@ -1,0 +1,39 @@
+cursor/select FF-CURSS
+cursor/move FF-CURSM
+cursor/invalid FF-CURSX
+
+env/dooropen1 FF-OPEN1
+env/dooropen2 FF-OPEN2
+
+env/doorclose1 FF-CLOS1
+env/doorclose2 FF-CLOS2
+
+misc/jingle FF-JINGL
+
+WeaponHitThing hmhit1a
+WeaponHitWall hamwal1
+WeaponMiss hammis2
+
+menu/activate		FF-CURSS	// Activate a new menu
+menu/backup			FF-CURSS	// Backup to previous menu
+menu/prompt			FF-CURSM	// Activate a prompt "menu"
+menu/cursor			FF-CURSM	// Move cursor up/down
+menu/change			FF-CURSM	// Select new value for option
+menu/invalid		FF-CURSX	// Menu not available
+menu/dismiss		FF-CURSS	// Dismiss a prompt message
+menu/choose			FF-CURSS	// Choose a menu item
+menu/clear			FF-CURSS	// Close top menu
+menu/quit1			FF-CURSS
+menu/quit2			FF-CURSS
+
+$limit cursor/select 0
+$limit cursor/move 0
+$limit cursor/invalid 0
+$limit env/dooropen1 0
+$limit env/dooropen2 0
+$limit env/doorclose1 0
+$limit env/doorclose2 0
+$limit misc/jingle 0
+$limit WeaponHitThing 0
+$limit WeaponHitWall 0
+$limit WeaponMiss 0

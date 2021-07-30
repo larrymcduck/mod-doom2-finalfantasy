@@ -1,0 +1,3240 @@
+#include "zcommon.acs"
+
+#define CURSOR 200
+ 
+#define id_cursor               100
+#define id_choices              101
+
+#define id_damage1					7000
+#define id_absorb1					7001
+#define id_INT1						7002
+#define id_VIT1						7003
+#define id_LUCK1					7004
+
+#define id_damage2					7005
+#define id_absorb2					7006
+#define id_INT2						7007
+#define id_VIT2						7008
+#define id_LUCK2					7009
+
+int levelExp[54] = { 40,196,547,1171,2146,3550,5461,7957,11116,15016,19735,25351,31942,39586,48361,58345,69617,82253,96332,111932,129131,148008,168639,191103,215479,241843,270275,300851,333651,366450,399250,432049,464849,497648,530448,563247,596047,628846,661646,694445,727245,760044,792844,825643,858443,891242,924042,956841,989641,0,0,0,0,0 };
+
+int numberOfWeapons = 6;
+str allWeapons[6] = { "FF_UnarmedInventory", "FF_WoodenStaffInventory","FF_SmallDaggerInventory","FF_WoodenNunchuckInventory","FF_RapierInventory","FF_IronHammerInventory" };
+str allWeaponNames[6] = { "FF_Unarmed", "FF_WoodenStaff", "FF_SmallDagger", "FF_WoodenNunchuck", "FF_Rapier", "FF_IronHammer" };
+str allDisplayWeapons[6] = { "Unarmed", "Wooden<","Small :","Wooden,","Rapier","Iron ?"};
+int damageArray[6] = { 0, 6, 5, 12, 9, 9 };
+str weaponEffects[1] = { "" };
+
+int numberOfOffHand = 1;
+str allOffHand[1] = { "FF_NoOffHand" };
+str allDisplayOffHand[1] = { "None" };
+int offHandArray[1] = { 0 };
+str offHandEffects[1] = { "" };
+
+int numberOfArmor = 4;
+str allArmor[4] = { "FF_NoArmor", "FF_ClothInventory", "FF_WoodenArmorInventory", "FF_ChainArmorInventory" };
+str allDisplayArmor[4] = { "None", "Cloth", "Wooden[", "Chain [" };
+int armorArray[4] = { 0, 1, 4, 15 };
+str armorEffects[1] = { "" };
+
+int numberOfHelm = 1;
+str allHelm[1] = { "FF_NoHelm" };
+str allDisplayHelm[1] = { "None" };
+int helmArray[1] = { 0 };
+str helmEffects[1] = { "" };
+
+int numberOfAcc = 1;
+str allAcc[1] = { "FF_NoAcc" };
+str allDisplayAcc[1] = { "None" };
+int accArray[1] = { 0 };
+str accEffects[1] = { "" };
+
+str equipWeaponList[255][255];
+str equipOffHandList[255][255];
+str equipArmorList[255][255];
+str equipHelmList[255][255];
+str equipAccList[255][255];
+
+int equippedOffHand[255];
+int equippedArmor[255];
+int equippedHelm[255];
+int equippedAcc[255];
+
+int weaponEffect[255];
+int offHandEffect[255];
+int armorEffect[255];
+int helmEffect[255];
+int accEffect[255];
+
+int menuChoice[255];
+int displayIndex[255];
+int itemsDisplayed[255];
+
+int equipping[255];
+int equippingWeapon[255];
+int equippingOffHand[255];
+int equippingArmor[255];
+int equippingHelm[255];
+int equippingAcc[255];
+
+int thisScript[255];
+int menu[255];
+int currentchoice[255];
+int maxchoices[255];
+
+str actualChoices[255][255];
+str displayNamesChoices[255][255];
+int actualChoicesInv[255][255];
+int actualDamage[255][255];
+int actualDefOffHand[255][255];
+int actualDefArmor[255][255];
+int actualDefHelm[255][255];
+int actualDefAcc[255][255];
+
+int choiceSpacing[255];
+
+int menuX[255];
+int menuY[255];
+int cursorX[255];
+int cursorY[255];
+
+int inShop[255];
+str shopChoices[255][6];
+int shopPrices[255][6];
+str shopMainMenuChoices[255][3];
+
+str actualItemBought[255][6];
+
+str sellChoices[255][255];
+int sellPrices[255][255];
+
+function void ClearMsg ( int id )
+{
+	HudMessage(s:""; 0,id,-1,0,0,0);
+}
+
+function void Choice ( int number, int name )
+{
+	SetHudSize(256,200,0);
+	SetFont("FF_FONT1");
+	HudMessage(s:"\cl",s:name;
+	HUDMSG_PLAIN,id_choices+number,CR_UNTRANSLATED,menuX[PlayerNumber()],menuY[PlayerNumber()]+(number*choiceSpacing[PlayerNumber()]),9999.0);
+	maxchoices[PlayerNumber()] = number;
+	for(int x=1; x<=maxchoices[PlayerNumber()]+1; x++)
+		ClearMsg(id_choices+number+x);
+}
+
+function void Choice2 ( int number, int name, int count)
+{
+	SetHudSize(256,200,0);
+	SetFont("FF_FONT1");
+	HudMessage(s:"\cl",s:name,s:"   ",d:count;
+	HUDMSG_PLAIN,id_choices+number,CR_UNTRANSLATED,menuX[PlayerNumber()],menuY[PlayerNumber()]+(number*choiceSpacing[PlayerNumber()]),9999.0);
+	maxchoices[PlayerNumber()] = number;
+	for(int x=1; x<=maxchoices[PlayerNumber()]+1; x++)
+		ClearMsg(id_choices+number+x);
+}
+
+function void ClearCursor ( void )
+{
+	ACS_Terminate(CURSOR,0);
+	ClearMsg(id_cursor);
+	ClearChoices();
+	menu[PlayerNumber()] = 0;
+	currentchoice[PlayerNumber()] = 0;
+}
+
+function void ClearChoices ( void )
+{
+	Choice(0,"");
+	for(int x=0; x<=100; x++)
+		ClearMsg(id_choices+x);
+}
+
+script CURSOR ( void )
+{
+	SetHudSize(256,200,0);
+	SetFont("ffcursor");
+	HudMessage(s:"A";HUDMSG_PLAIN,id_cursor,-1,cursorX[PlayerNumber()], cursorY[PlayerNumber()] + choiceSpacing[PlayerNumber()]*currentchoice[PlayerNumber()],0);
+	
+	SetFont("FF_FONT1");
+	if (equipping[PlayerNumber()] == 1)
+	{
+		bool clearMessage = false;
+		int damage = CheckInventory("HeroDamage");
+		int absorb = CheckInventory("HeroAbsorb");
+		
+		if (equippingWeapon[PlayerNumber()] == 1)
+		{
+			if (actualDamage[PlayerNumber()][currentchoice[PlayerNumber()]] == -1)
+			{
+				clearMessage = true;
+			}
+			else
+			{
+				int strength = (CheckInventory("STR") / 2);
+				damage = strength + actualDamage[PlayerNumber()][currentchoice[PlayerNumber()]];
+				
+				if (damage < 1)
+				{
+					damage = 1;
+				}
+				
+				if (IsBlackBelt())
+				{
+					if (actualDamage[PlayerNumber()][currentchoice[PlayerNumber()]] == 0)
+					{
+						damage = CheckInventory("Level") * 2;
+					}
+					else
+					{
+						damage = (strength + actualDamage[PlayerNumber()][currentchoice[PlayerNumber()]]) + 1;
+					}
+				}
+			}		
+		}		
+		else if (equippingOffHand[PlayerNumber()] == 1 || equippingArmor[PlayerNumber()] == 1 || equippingHelm[PlayerNumber()] == 1 || equippingAcc[PlayerNumber()] == 1)
+		{
+			if ((equippingOffHand[PlayerNumber()] == 1 && actualDefOffHand[PlayerNumber()][currentchoice[PlayerNumber()]] == -1) || (equippingArmor[PlayerNumber()] == 1 && actualDefArmor[PlayerNumber()][currentchoice[PlayerNumber()]] == -1) || (equippingHelm[PlayerNumber()] == 1 && actualDefHelm[PlayerNumber()][currentchoice[PlayerNumber()]] == -1) || (equippingAcc[PlayerNumber()] == 1 && actualDefAcc[PlayerNumber()][currentchoice[PlayerNumber()]] == -1))
+			{
+				clearMessage = true;
+			}
+			else
+			{
+				absorb = 0;
+				if (equippingOffHand[PlayerNumber()] == 1)
+				{
+					absorb = actualDefOffHand[PlayerNumber()][currentchoice[PlayerNumber()]] + armorArray[equippedArmor[PlayerNumber()]] + helmArray[equippedArmor[PlayerNumber()]] + accArray[equippedArmor[PlayerNumber()]];
+				}
+				if (equippingArmor[PlayerNumber()] == 1)
+				{
+					absorb = offHandArray[equippedOffHand[PlayerNumber()]] + actualDefArmor[PlayerNumber()][currentchoice[PlayerNumber()]] + helmArray[equippedArmor[PlayerNumber()]] + accArray[equippedArmor[PlayerNumber()]];
+				}
+				if (equippingHelm[PlayerNumber()] == 1)
+				{
+					absorb = offHandArray[equippedOffHand[PlayerNumber()]] + armorArray[equippedArmor[PlayerNumber()]] + actualDefHelm[PlayerNumber()][currentchoice[PlayerNumber()]] + accArray[equippedArmor[PlayerNumber()]];
+				}
+				if (equippingAcc[PlayerNumber()] == 1)
+				{
+					absorb = offHandArray[equippedOffHand[PlayerNumber()]] + armorArray[equippedArmor[PlayerNumber()]] + helmArray[equippedArmor[PlayerNumber()]] + actualDefAcc[PlayerNumber()][currentchoice[PlayerNumber()]];
+				}
+			}
+		}
+
+		if (clearMessage)
+		{
+			HudMessage(s:"";HUDMSG_PLAIN,id_damage2,CR_UNTRANSLATED,113.0,12.0,0);
+			HudMessage(s:"";HUDMSG_PLAIN,id_absorb2,CR_UNTRANSLATED,113.0,36.0,0);
+		}
+		else
+		{
+			HudMessage(d:damage;HUDMSG_PLAIN,id_damage2,CR_UNTRANSLATED,113.0,12.0,0);
+			HudMessage(d:absorb;HUDMSG_PLAIN,id_absorb2,CR_UNTRANSLATED,113.0,36.0,0);
+		}
+	}
+	else
+	{
+		ClearMsg(id_damage2);
+		ClearMsg(id_absorb2);
+	}
+	
+	delay(1);
+	restart;
+}
+
+script 201 ( void ) NET // MENU UP.
+{
+	if(menu[PlayerNumber()]==1)
+	{
+		if(currentchoice[PlayerNumber()] > 0)
+		{
+			currentchoice[PlayerNumber()]--;
+		}
+		else 
+		{
+			currentchoice[PlayerNumber()] = maxchoices[PlayerNumber()];
+		}
+		
+		LocalAmbientSound("cursor/move",127);
+	}
+}
+ 
+script 202 ( void ) NET // MENU DOWN.
+{
+	if(menu[PlayerNumber()]==1)
+	{
+		if(currentchoice[PlayerNumber()] <= maxchoices[PlayerNumber()] - 1)
+		{
+			currentchoice[PlayerNumber()]++;
+		}
+		else 
+		{
+			currentchoice[PlayerNumber()] = 0;
+		}
+
+		LocalAmbientSound("cursor/move",127);
+	}
+}
+ 
+script 203 ( void ) NET // MENU SELECT.
+{
+  if(menu[PlayerNumber()]==1)
+  {
+    ClearMsg(id_cursor);
+    ACS_Execute(thisScript[PlayerNumber()],0);
+    delay(1);
+    currentchoice[PlayerNumber()] = 0;
+  }
+}
+
+function int StatIncrease ( void )
+{
+	int retVal = 0;
+	if (random(1,100) <= 25)
+	{
+		retVal = 1;
+	}
+	
+	return retVal;
+}
+
+// --------------------------------------------------------------
+
+function bool IsFighter ( void )
+{
+	return CheckInventory("IsFighter");
+}
+
+function bool IsKnight ( void )
+{
+	return CheckInventory("IsKnight");
+}
+
+function bool IsThief ( void )
+{
+	return CheckInventory("IsThief");
+}
+
+function bool IsNinja ( void )
+{
+	return CheckInventory("IsNinja");
+}
+
+function bool IsBlackBelt ( void )
+{
+	return CheckInventory("IsBlackBelt");
+}
+
+function bool IsMaster ( void )
+{
+	return CheckInventory("IsMaster");
+}
+
+function bool IsRedMage ( void )
+{
+	return CheckInventory("IsRedMage");
+}
+
+function bool IsRedWizard ( void )
+{
+	return CheckInventory("IsRedWizard");
+}
+
+function bool IsWhiteMage ( void )
+{
+	return CheckInventory("IsWhiteMage");
+}
+
+function bool IsWhiteWizard ( void )
+{
+	return CheckInventory("IsWhiteWizard");
+}
+
+function bool IsBlackMage ( void )
+{
+	return CheckInventory("IsBlackMage");
+}
+
+function bool IsBlackWizard ( void )
+{
+	return CheckInventory("IsBlackWizard");
+}
+
+script 999 enter
+{
+	Thing_ChangeTID(0,PlayerNumber() + 1);
+	
+	ACS_ExecuteAlways(997, 0);
+}
+
+script 998 open
+{
+	SetPlayerProperty(0,0,PROP_TOTALLYFROZEN);
+}
+
+script 997 ( void )
+{
+	int level = CheckInventory("Level");
+	
+	int exp = CheckInventory("Exp");
+	
+	ACS_ExecuteAlways(7,0);
+	
+	int toNext = levelExp[level - 1] - exp;
+	if (toNext <= 0 && level < 50)
+	{
+		GiveInventory("Level",1);
+		
+		level = CheckInventory("Level");		
+		
+		// stat gains
+		
+		bool strongHpGain = false;
+		int strUp = StatIncrease();
+		int agiUp = StatIncrease();
+		int intUp = StatIncrease();
+		int vitUp = StatIncrease();
+		int luckUp = StatIncrease();
+		
+		Delay(1);
+		
+		switch (level)
+		{
+			case 2:
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage() || IsWhiteMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt() || IsRedMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 3:
+				if (IsFighter() || IsThief())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					agiUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 4:
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					agiUp = 1;
+				}
+				if (IsFighter() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 5:
+				if (IsFighter() || IsThief())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsRedMage() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 6:
+				if (IsFighter() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsBlackMage())
+				{
+					agiUp = 1;
+				}
+				if (IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 7:
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsRedMage())
+				{
+					agiUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 8:
+				if (IsFighter() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt() || IsRedMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 9:
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsRedMage() || IsBlackMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 10:
+				if (IsFighter() || IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					agiUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 11:
+				if (IsFighter() || IsThief() || IsBlackMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 12:
+				if (IsRedMage() || IsWhiteMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					agiUp = 1;
+				}
+				if (IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsBlackMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 13:
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter())
+				{
+					agiUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 14:
+				if (IsFighter() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 15:
+				if (IsThief())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsRedMage() || IsBlackMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 16:
+				if (IsFighter() || IsBlackBelt() || IsRedMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					agiUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt() || IsBlackMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsRedMage() || IsWhiteMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 17:
+				if (IsFighter() || IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 18:
+				if (IsThief() || IsBlackMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					agiUp = 1;
+				}
+				if (IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 19:
+				if (IsFighter() || IsBlackBelt())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief())
+				{
+					agiUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 20:
+				if (IsFighter() || IsWhiteMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt() || IsBlackMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 21:
+				if (IsThief())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsRedMage() || IsBlackMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 22:
+				if (IsFighter() || IsBlackBelt() || IsBlackMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					agiUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 23:
+				if (IsFighter())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt() || IsRedMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 24:
+				if (IsThief() || IsWhiteMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					agiUp = 1;
+				}
+				if (IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 25:
+				if (IsBlackBelt())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief())
+				{
+					agiUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 26:
+				if (IsFighter() || IsBlackMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt() || IsRedMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 27:
+				if (IsThief() || IsRedMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsRedMage() || IsBlackMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 28:
+				if (IsBlackBelt() || IsWhiteMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					agiUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt() || IsBlackMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 29:
+				if (IsFighter())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt() || IsRedMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 30:
+				if (IsThief() || IsBlackMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					agiUp = 1;
+				}
+				if (IsWhiteMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsBlackMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 31:
+				if (IsBlackBelt())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief())
+				{
+					agiUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 32:
+				if (IsFighter() || IsBlackBelt() || IsWhiteMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 33:
+				if (IsThief())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsRedMage() || IsBlackMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 34:
+				if (IsBlackBelt())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					strUp = 1;
+				}
+				if (IsThief() || IsBlackBelt())
+				{
+					agiUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 35:
+				if (IsFighter() || IsBlackMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 36:
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsRedMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 37:
+				if (IsThief() || IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief())
+				{
+					agiUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 38:
+				if (IsFighter())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt() || IsRedMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 39:
+				if (IsFighter() || IsThief() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsRedMage() || IsBlackMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					vitUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 40:
+				if (IsBlackBelt())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage() || IsWhiteMage() || IsBlackMage())
+				{
+					strUp = 1;
+				}
+				if (IsThief() || IsBlackBelt())
+				{
+					agiUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsFighter() || IsBlackBelt() || IsBlackMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsRedMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 41:
+				if (IsFighter() || IsThief() || IsBlackMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 42:
+				if (IsWhiteMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsBlackMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 43:
+				if (IsBlackBelt())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsBlackBelt() || IsWhiteMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief())
+				{
+					agiUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsRedMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 44:
+				if (IsFighter())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsBlackBelt() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsRedMage() || IsWhiteMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 45:
+				if (IsFighter() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsWhiteMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 46:
+				if (IsThief() || IsBlackBelt())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage() || IsWhiteMage())
+				{
+					strUp = 1;
+				}
+				if (IsBlackBelt())
+				{
+					agiUp = 1;
+				}
+				if (IsThief() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 47:
+				if (IsFighter() || IsBlackBelt() || IsRedMage() || IsWhiteMage())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsBlackBelt())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsRedMage() || IsWhiteMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 48:
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsWhiteMage() || IsBlackMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsRedMage())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 49:
+				if (IsBlackBelt())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsBlackBelt() || IsWhiteMage())
+				{
+					strUp = 1;
+				}
+				if (IsFighter() || IsThief())
+				{
+					agiUp = 1;
+				}
+				if (IsThief() || IsBlackBelt() || IsRedMage() || IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt())
+				{
+					vitUp = 1;
+				}
+				if (IsThief())
+				{
+					luckUp = 1;
+				}
+				break;
+			case 50:
+				if (IsFighter())
+				{
+					strongHpGain = true;
+				}
+				if (IsFighter() || IsThief() || IsRedMage())
+				{
+					strUp = 1;
+				}
+				if (IsBlackBelt() || IsWhiteMage())
+				{
+					agiUp = 1;
+				}
+				if (IsBlackMage())
+				{
+					intUp = 1;
+				}
+				if (IsBlackBelt() || IsRedMage())
+				{
+					vitUp = 1;
+				}
+				if (IsThief() || IsWhiteMage() || IsBlackMage())
+				{
+					luckUp = 1;
+				}
+				break;
+		}
+		
+		GiveInventory("STR",strUp);
+		GiveInventory("AGL",agiUp);
+		GiveInventory("INT",intUp);
+		GiveInventory("VIT",vitUp);
+		GiveInventory("LUCK",luckUp);
+
+		Delay(1);
+		
+		// ----------------------------
+
+		// - DAMAGE -
+		TakeInventory("HeroDamage",999);
+		int strength = (CheckInventory("STR") / 2);
+		
+		int weaponDamageIndex = 0;
+		while (weaponDamageIndex < numberOfWeapons)
+		{
+			if (CheckWeapon(allWeapons[weaponDamageIndex]))
+			{
+				break;
+			}
+			
+			weaponDamageIndex++;
+		}
+		
+		int damage = strength + damageArray[weaponDamageIndex];
+		
+		if (damage < 1)
+		{
+			damage = 1;
+		}
+		
+		if (IsBlackBelt())
+		{
+			if (CheckWeapon("FF_Unarmed"))
+			{
+				damage = CheckInventory("Level") * 2;
+			}
+			else
+			{
+				damage++;
+			}
+		}
+		GiveInventory("HeroDamage",damage);
+		
+		// ----------------------------
+		
+		// - HIT % -
+		
+		if (IsFighter() || IsBlackBelt())
+		{
+			GiveInventory("HeroHit",3);
+		}
+		if (IsThief() || IsRedMage())
+		{
+			GiveInventory("HeroHit",2);
+		}
+		if (IsWhiteMage() || IsBlackMage())
+		{
+			GiveInventory("HeroHit",1);
+		}
+		
+		// ----------------------------
+		
+		// - HP -
+		
+		int hpUp = CheckInventory("VIT") / 4;
+		if (strongHpGain)
+		{
+			hpUp += random(20,25);
+		}
+				
+		if (IsBlackBelt() && level == 50)
+		{			
+			GiveInventory("MaxHp", 999);
+			GiveInventory("MaxHpItem",999);
+		}
+		else
+		{
+			GiveInventory("MaxHp", hpUp);
+			GiveInventory("MaxHpItem",hpUp);
+		}
+		
+		// ----------------------------
+		
+	}
+	
+	Delay(1);
+	restart;
+}
+
+function void ClearMainMenuChoices ( void )
+{	
+	int index = 0;
+	while (index < 3)
+	{
+		shopMainMenuChoices[PlayerNumber()][index] = "";
+		index++;
+	}
+}
+
+function void ClearMenuChoices ( void )
+{
+	int index = 0;
+	while (index < 6)
+	{
+		shopChoices[PlayerNumber()][index] = "";
+		shopPrices[PlayerNumber()][index] = 0;
+		actualItemBought[PlayerNumber()][index] = "";
+		ClearMsg(index + 9921);
+		index++;
+	}
+}
+
+function void SetMainMenuChoices ( void )
+{
+	Choice(0, "");
+	int index = 0;
+	while (index < 3)
+	{
+		if (shopMainMenuChoices[PlayerNumber()][index] == "")
+		{
+			break;
+		}
+		Choice(index, shopMainMenuChoices[PlayerNumber()][index]);
+		index++;
+		//maxchoices[PlayerNumber()] = index;
+	}
+
+	//itemsDisplayed[PlayerNumber()] = maxchoices[PlayerNumber()];
+	
+	index = 9921;
+	while (index <= 9925)
+	{
+		ClearMsg(index);
+		index++;
+	}
+}
+
+function void SetShopChoices ( void )
+{
+	Choice(0, "");
+	int index = 0;
+	while (index <= 4)
+	{
+		if (shopPrices[PlayerNumber()][index] == 0)
+		{
+			break;
+		}
+		Choice(index,shopChoices[PlayerNumber()][index]);
+		HudMessage(d:shopPrices[PlayerNumber()][index];HUDMSG_PLAIN,index+9921,CR_UNTRANSLATED,menuX[PlayerNumber()],menuY[PlayerNumber()]+8.0+(index*choiceSpacing[PlayerNumber()]),0);
+		index++;
+	}
+	Choice(index,"Back");
+	//maxchoices[PlayerNumber()] = index;
+
+	//itemsDisplayed[PlayerNumber()] = maxchoices[PlayerNumber()];
+}
+
+function void SetSellChoices ( void )
+{
+	Choice(0, "");
+	
+	// get items to sell
+	
+	int index = 0;
+
+	while (index <= 254)
+	{
+		actualChoices[PlayerNumber()][index] = "";
+		sellPrices[PlayerNumber()][index] = 0;
+		index++;
+	}
+
+	while (index <= 254)
+	{
+		if (sellPrices[PlayerNumber()][index] == 0)
+		{
+			break;
+		}
+		actualChoices[PlayerNumber()][index] = sellChoices[PlayerNumber()][index];
+		Choice(index,sellChoices[PlayerNumber()][index]);
+		index++;
+	}
+	
+	Choice(index,"Back");
+}
+
+function void initGet ( void )
+{
+	Choice(0,"");
+	int pNum = PlayerNumber();
+	int invIndex = 0;
+	while (invIndex < 255)
+	{
+		displayNamesChoices[pNum][invIndex] = "";
+		actualChoices[pNum][invIndex] = "";
+		actualChoicesInv[pNum][invIndex] = 0;
+		actualDamage[pNum][invIndex] = 0;
+		invIndex++;
+	}
+}
+
+function void GetEquipWeapons( void )
+{
+	initGet();
+
+	int pNum = PlayerNumber();
+	int invIndex = 0;
+	int counterIndex = 0;
+	
+	while (counterIndex < numberOfWeapons)
+	{
+		if (CheckInventory(allWeapons[counterIndex]) && CanEquip(allWeapons[counterIndex]) == 1)
+		{
+			displayNamesChoices[pNum][invIndex] = allDisplayWeapons[counterIndex];
+			actualChoices[pNum][invIndex] = allWeapons[counterIndex];
+			actualChoicesInv[pNum][invIndex] = CheckInventory(allWeapons[counterIndex]);
+			actualDamage[pNum][invIndex] = damageArray[counterIndex];
+			
+			invIndex++;
+		}		
+		counterIndex++;		
+	}
+	
+	actualDamage[pNum][invIndex] = -1;
+}
+
+function void GetEquipOffHand( void )
+{
+	initGet();
+
+	int pNum = PlayerNumber();
+	int invIndex = 0;
+	int counterIndex = 0;
+	
+	while (counterIndex < numberOfOffHand)
+	{
+		if (CheckInventory(allOffHand[counterIndex]) && CanEquip(allOffHand[counterIndex]) == 1)
+		{
+			displayNamesChoices[pNum][invIndex] = allDisplayOffHand[counterIndex];
+			actualChoices[pNum][invIndex] = allOffHand[counterIndex];
+			actualChoicesInv[pNum][invIndex] = CheckInventory(allOffHand[counterIndex]);
+			actualDefOffHand[pNum][invIndex] = offHandArray[counterIndex];
+			
+			invIndex++;
+		}		
+		counterIndex++;		
+	}
+	
+	actualDefOffHand[pNum][invIndex] = -1;
+}
+
+function void GetEquipArmor( void )
+{
+	initGet();
+
+	int pNum = PlayerNumber();
+	int invIndex = 0;
+	int counterIndex = 0;
+	
+	while (counterIndex < numberOfArmor)
+	{
+		if (CheckInventory(allArmor[counterIndex]) && CanEquip(allArmor[counterIndex]) == 1)
+		{
+			displayNamesChoices[pNum][invIndex] = allDisplayArmor[counterIndex];
+			actualChoices[pNum][invIndex] = allArmor[counterIndex];
+			actualChoicesInv[pNum][invIndex] = CheckInventory(allArmor[counterIndex]);
+			actualDefArmor[pNum][invIndex] = armorArray[counterIndex];
+			
+			invIndex++;
+		}		
+		counterIndex++;		
+	}
+	
+	actualDefArmor[pNum][invIndex] = -1;
+}
+
+function void GetEquipHelm( void )
+{
+	initGet();
+
+	int pNum = PlayerNumber();
+	int invIndex = 0;
+	int counterIndex = 0;
+	
+	while (counterIndex < numberOfHelm)
+	{
+		if (CheckInventory(allHelm[counterIndex]) && CanEquip(allHelm[counterIndex]) == 1)
+		{
+			displayNamesChoices[pNum][invIndex] = allDisplayHelm[counterIndex];
+			actualChoices[pNum][invIndex] = allHelm[counterIndex];
+			actualChoicesInv[pNum][invIndex] = CheckInventory(allHelm[counterIndex]);
+			actualDefHelm[pNum][invIndex] = helmArray[counterIndex];
+			
+			invIndex++;
+		}		
+		counterIndex++;		
+	}
+	
+	actualDefHelm[pNum][invIndex] = -1;
+}
+
+function void GetEquipAcc( void )
+{
+	initGet();
+
+	int pNum = PlayerNumber();
+	int invIndex = 0;
+	int counterIndex = 0;
+	
+	while (counterIndex < numberOfAcc)
+	{
+		if (CheckInventory(allAcc[counterIndex]) && CanEquip(allAcc[counterIndex]) == 1)
+		{
+			displayNamesChoices[pNum][invIndex] = allDisplayAcc[counterIndex];
+			actualChoices[pNum][invIndex] = allAcc[counterIndex];
+			actualChoicesInv[pNum][invIndex] = CheckInventory(allAcc[counterIndex]);
+			actualDefAcc[pNum][invIndex] = accArray[counterIndex];
+			
+			invIndex++;
+		}		
+		counterIndex++;		
+	}
+	
+	actualDefAcc[pNum][invIndex] = -1;
+}
+
+function int CanEquip ( str weaponStr )
+{
+	int retVal = 0;
+	switch (weaponStr)
+	{
+		// - WEAPONS - //
+		case "FF_UnarmedInventory":
+			retVal = 1;
+			break;
+		case "FF_WoodenStaffInventory":
+			if (IsFighter() || IsWhiteMage() || IsNinja())
+			{
+				retVal = 1;
+			}
+			break;
+		case "FF_SmallDaggerInventory":
+			if (IsFighter() || IsThief() || IsRedMage() || IsBlackMage())
+			{
+				retVal = 1;
+			}
+			break;
+		case "FF_WoodenNunchuckInventory":
+			if (IsBlackBelt() || IsNinja())
+			{
+				retVal = 1;
+			}
+			break;
+		case "FF_RapierInventory":
+			if (IsFighter() || IsThief() || IsRedMage())
+			{
+				retVal = 1;
+			}
+			break;
+		case "FF_IronHammerInventory":
+			if (IsFighter() || IsWhiteMage() || IsNinja())
+			{
+				retVal = 1;
+			}
+			break;
+			
+		// - ARMOR - //
+		case "FF_NoOffHand":
+		case "FF_NoArmor":
+		case "FF_NoHelm":
+		case "FF_NoAcc":
+		case "FF_ClothInventory":
+			retVal = 1;
+			break;
+		case "FF_WoodenArmorInventory":
+			if (IsFighter() || IsThief() || IsBlackBelt() || IsRedMage())
+			{
+				retVal = 1;
+			}
+			break;
+		case "FF_ChainArmorInventory":
+			if (IsFighter() || IsRedMage() || IsNinja())
+			{
+				retVal = 1;
+			}
+			break;
+	}
+	return retVal;
+}
+
+function void ClearWeapons ( void )
+{
+	int index = 0;
+	while (index < numberOfWeapons)
+	{
+		TakeInventory(GetWeaponStr(allWeapons[index]), 999);
+		index++;
+	}
+}
+
+function str GetWeaponStr ( str weaponInv )
+{
+	int weaponIndex = 0;
+	str weapon = "";
+	while (weaponIndex < numberOfWeapons)
+	{
+		if (StrIcmp(weaponInv, allWeapons[weaponIndex]) == 0)
+		{
+			weapon = allWeaponNames[weaponIndex];
+			break;
+		}
+		
+		weaponIndex++;
+	}
+	
+	return weapon;
+}
+
+function str GetWeaponDisplayName ( str weapon )
+{
+	str displayName = "";
+	
+	int index = 0;
+	while (index < numberOfWeapons)
+	{
+		if (StrIcmp(weapon, allWeaponNames[index]) == 0)
+		{
+			displayName = allDisplayWeapons[index];
+			break;
+		}
+		index++;
+	}
+	
+	return displayName;
+}
+
+function int GetArmorIndex ( str armor )
+{
+	int retVal = -1;
+	int index = 0;
+	while (index < numberOfArmor)
+	{
+		if (StrIcmp(armor, allArmor[index]) == 0)
+		{
+			retVal = index;
+			break;
+		}
+		index++;
+	}
+	
+	return retVal;
+}
+
+script 204 ( void ) NET // Hero Menu
+{
+	thisScript[PlayerNumber()] = 204;
+
+	Thing_Stop(0);
+	SetPlayerProperty(0,1,PROP_TOTALLYFROZEN);
+
+	str playerPic = GetPlayerPic();
+	str class = GetClass();
+
+	int menuImageId = 9971;
+
+	int playerPicId = 9900;
+	int playerClassId = 9901;
+	
+	int levelId = 9902;
+	
+	int expId = 9903;
+	int expNextId = 9904;
+	
+	int strId = 9905;
+	int aglId = 9906;
+	int intId = 9907;
+	int vitId = 9908;
+	int luckId = 9909;
+	
+	int damageId = 9910;
+	int hitId = 9911;
+	int absorbId = 9912;
+	int evadeId = 9913;
+	
+	int goldId = 9914;
+
+	int tlOrbId = 9915;
+	int trOrbId = 9916;
+	int blOrbId = 9917;
+	int brOrbId = 9918;
+	
+	bool leave = false;
+	menuX[PlayerNumber()] = -999.0;
+
+	int index = 0;
+	bool onMainMenu = true;
+	bool onItemMenu = false;
+	bool onMagicMenu = false;
+	bool onEquipMenu = false;
+	
+	equipping[PlayerNumber()] = 0;
+	equippingWeapon[PlayerNumber()] = 0;
+	equippingOffHand[PlayerNumber()] = 0;
+	equippingArmor[PlayerNumber()] = 0;
+	equippingHelm[PlayerNumber()] = 0;
+	equippingAcc[PlayerNumber()] = 0;
+	
+	SetHudSize(256,200,0);
+
+	ACS_Execute(CURSOR,0);
+	menu[PlayerNumber()] = 1;
+
+	while (!leave)
+	{
+		currentchoice[PlayerNumber()] = 0;
+		bool choiceGood = true;
+		str menuPic = "";
+
+		Choice(0,"");
+		index = 9900;
+		while (index <= 9920)
+		{
+			ClearMsg(index);
+			index++;
+		}
+		
+		index = 7000;
+		while (index <= 7100)
+		{
+			ClearMsg(index);
+			index++;
+		}
+		
+		if (onMainMenu)
+		{
+			choiceSpacing[PlayerNumber()] = 16.0;
+			menuPic = "heromenu";
+			menuX[PlayerNumber()] = -999.0;
+			menuY[PlayerNumber()] = -999.0;
+			cursorX[PlayerNumber()] = 18.0;
+			cursorY[PlayerNumber()] = 130.0;
+			Choice(0,"ITEM");
+			Choice(1,"MAGIC");
+			Choice(2,"EQUIP");
+			Choice(3,"BACK");
+
+			SetFont(playerPic);
+			HudMessage(s:"A";HUDMSG_PLAIN,playerPicId,CR_UNTRANSLATED,104.0,22.0,0);
+			
+			SetFont("FF_FONT1");
+			HudMessage(s:class;HUDMSG_PLAIN,playerClassId,CR_UNTRANSLATED,145.0,22.0,0);
+			
+			int level = CheckInventory("Level");
+			HudMessage(d:level;HUDMSG_PLAIN,levelId,CR_UNTRANSLATED,232.0,22.0,0);
+			HudMessage(d:CheckInventory("Gold"),s:" G";HUDMSG_PLAIN,goldId,CR_UNTRANSLATED,44.0,84.0,0);
+			
+			int exp = CheckInventory("Exp");
+			HudMessage(d:exp;HUDMSG_PLAIN,expId,CR_UNTRANSLATED,211.0,61.0,0);
+			
+			int toNext = levelExp[level - 1] - exp;
+			if (level == 50)
+			{
+				toNext = 0;
+			}
+			HudMessage(d:toNext;HUDMSG_PLAIN,expNextId,CR_UNTRANSLATED,211.0,77.0,0);
+			
+			int strength = CheckInventory("STR");
+			int agl = CheckInventory("AGL");
+			int intl = CheckInventory("INT");
+			int vit = CheckInventory("VIT");
+			int luck = CheckInventory("LUCK");
+			
+			int heroDamage = CheckInventory("HeroDamage");
+			int heroHit = CheckInventory("HeroHit");
+			int heroAbsorb = CheckInventory("HeroAbsorb");
+			int health = CheckInventory("Health");
+			int maxHp = CheckInventory("MaxHpItem");
+
+			HudMessage(d:strength;HUDMSG_PLAIN,strId,CR_UNTRANSLATED,140.0,114.0,0);
+			HudMessage(d:agl;HUDMSG_PLAIN,aglId,CR_UNTRANSLATED,140.0,130.0,0);
+			HudMessage(d:intl;HUDMSG_PLAIN,intId,CR_UNTRANSLATED,140.0,146.0,0);
+			HudMessage(d:vit;HUDMSG_PLAIN,vitId,CR_UNTRANSLATED,140.0,162.0,0);
+			HudMessage(d:luck;HUDMSG_PLAIN,luckId,CR_UNTRANSLATED,140.0,178.0,0);
+
+			HudMessage(d:heroDamage;HUDMSG_PLAIN,id_damage1,CR_UNTRANSLATED,231.0,114.0,0);
+			HudMessage(d:heroHit;HUDMSG_PLAIN,id_absorb1,CR_UNTRANSLATED,231.0,130.0,0);
+			HudMessage(d:heroAbsorb;HUDMSG_PLAIN,id_INT1,CR_UNTRANSLATED,231.0,146.0,0);
+			HudMessage(d:health;HUDMSG_PLAIN,id_VIT1,CR_UNTRANSLATED,231.0,162.0,0);
+			HudMessage(d:maxHp;HUDMSG_PLAIN,id_LUCK1,CR_UNTRANSLATED,231.0,178.0,0);
+
+			SetFont("orb_none");
+			HudMessage(s:"A";HUDMSG_PLAIN,tlOrbId,CR_UNTRANSLATED,36.0,25.0,0);
+			HudMessage(s:"A";HUDMSG_PLAIN,trOrbId,CR_UNTRANSLATED,52.0,25.0,0);
+			HudMessage(s:"A";HUDMSG_PLAIN,blOrbId,CR_UNTRANSLATED,36.0,41.0,0);
+			HudMessage(s:"A";HUDMSG_PLAIN,brOrbId,CR_UNTRANSLATED,52.0,41.0,0);
+			
+			if (CheckInventory("EarthOrb"))
+			{				
+				SetFont("orb_erth");
+				HudMessage(s:"A";HUDMSG_PLAIN,brOrbId,CR_UNTRANSLATED,52.0,41.0,0);
+			}
+			if (CheckInventory("FireOrb"))
+			{				
+				SetFont("orb_fire");
+				HudMessage(s:"A";HUDMSG_PLAIN,brOrbId,CR_UNTRANSLATED,52.0,41.0,0);
+			}
+			if (CheckInventory("WaterOrb"))
+			{				
+				SetFont("orb_watr");
+				HudMessage(s:"A";HUDMSG_PLAIN,brOrbId,CR_UNTRANSLATED,52.0,41.0,0);
+			}
+			if (CheckInventory("AirOrb"))
+			{				
+				SetFont("orb_air");
+				HudMessage(s:"A";HUDMSG_PLAIN,brOrbId,CR_UNTRANSLATED,52.0,41.0,0);
+			}			
+		}
+		if (onItemMenu)
+		{
+			menuPic = "heromenu";
+		}
+		if (onMagicMenu)
+		{
+			menuPic = "heromenu";
+		}
+		if (onEquipMenu)
+		{
+			menuPic = "eqipmenu";
+			
+			SetFont("FF_FONT1");
+			HudMessage(d:CheckInventory("HeroDamage");HUDMSG_PLAIN,id_damage1,CR_UNTRANSLATED,74.0,12.0,0);
+			HudMessage(d:CheckInventory("HeroAbsorb");HUDMSG_PLAIN,id_absorb1,CR_UNTRANSLATED,74.0,36.0,0);
+
+			HudMessage(s:GetWeaponDisplayName(GetWeapon());HUDMSG_PLAIN,7030,CR_UNTRANSLATED,219.0,12.0,0);
+			HudMessage(s:allDisplayArmor[equippedOffHand[PlayerNumber()]];HUDMSG_PLAIN,7031,CR_UNTRANSLATED,219.0,28.0,0);
+			HudMessage(s:allDisplayArmor[equippedArmor[PlayerNumber()]];HUDMSG_PLAIN,7032,CR_UNTRANSLATED,219.0,44.0,0);
+			HudMessage(s:allDisplayArmor[equippedHelm[PlayerNumber()]];HUDMSG_PLAIN,7033,CR_UNTRANSLATED,219.0,60.0,0);
+			HudMessage(s:allDisplayArmor[equippedAcc[PlayerNumber()]];HUDMSG_PLAIN,7034,CR_UNTRANSLATED,219.0,76.0,0);
+			
+			if (weaponEffect[PlayerNumber()] > 0)
+			{
+				SetFont(weaponEffects[weaponEffect[PlayerNumber()]]);
+				HudMessage(s:"A";HUDMSG_PLAIN,7035,CR_UNTRANSLATED,66.0,20.0,0);
+			}
+			
+			int effectY = 44.0;
+			if (offHandEffect[PlayerNumber()] > 0)
+			{
+				SetFont(offHandEffects[offHandEffect[PlayerNumber()]]);
+				HudMessage(s:"A";HUDMSG_PLAIN,7036,CR_UNTRANSLATED,66.0,effectY,0);
+				effectY += 8.0;
+			}
+
+			if (armorEffect[PlayerNumber()] > 0)
+			{
+				SetFont(armorEffects[armorEffect[PlayerNumber()]]);
+				HudMessage(s:"A";HUDMSG_PLAIN,7037,CR_UNTRANSLATED,66.0,effectY,0);
+				effectY += 8.0;
+			}
+
+			if (helmEffect[PlayerNumber()] > 0)
+			{
+				SetFont(helmEffects[helmEffect[PlayerNumber()]]);
+				HudMessage(s:"A";HUDMSG_PLAIN,7038,CR_UNTRANSLATED,66.0,effectY,0);
+				effectY += 8.0;
+			}
+
+			if (accEffect[PlayerNumber()] > 0)
+			{
+				SetFont(accEffects[accEffect[PlayerNumber()]]);
+				HudMessage(s:"A";HUDMSG_PLAIN,7039,CR_UNTRANSLATED,66.0,effectY,0);
+			}
+			
+			if (equipping[PlayerNumber()] == 0)
+			{
+				menuX[PlayerNumber()] = -999.0;
+				menuY[PlayerNumber()] = -999.0;
+				cursorX[PlayerNumber()] = 131.0;
+				cursorY[PlayerNumber()] = 15.0;
+				choiceSpacing[PlayerNumber()] = 16.0;
+
+				Choice(0,"WEAPON");
+				Choice(1,"OFF HAND");
+				Choice(2,"ARMOR");
+				Choice(3,"HELM");
+				Choice(4,"ACC");
+				Choice(5,"BACK");
+			}
+			else
+			{
+				menuX[PlayerNumber()] = 104.0;
+				menuY[PlayerNumber()] = 111.0;
+				cursorX[PlayerNumber()] = 56.0;
+				cursorY[PlayerNumber()] = 115.0;
+				choiceSpacing[PlayerNumber()] = 8.0;
+				
+				if (equippingWeapon[PlayerNumber()] == 1)
+				{
+					GetEquipWeapons();
+				}
+				else if (equippingOffHand[PlayerNumber()] == 1)
+				{
+					GetEquipOffHand();
+				}
+				else if (equippingArmor[PlayerNumber()] == 1)
+				{
+					GetEquipArmor();
+				}
+				else if (equippingHelm[PlayerNumber()] == 1)
+				{
+					GetEquipHelm();
+				}
+				else if (equippingAcc[PlayerNumber()] == 1)
+				{
+					GetEquipAcc();
+				}
+
+				int equipIndex = 0;
+				while (equipIndex < 50)
+				{
+					if (actualChoicesInv[PlayerNumber()][equipIndex] == 0)
+					{
+						break;
+					}
+					if (equipIndex == 0)
+					{
+						Choice(equipIndex,displayNamesChoices[PlayerNumber()][equipIndex]);
+					}
+					else
+					{
+						Choice2(equipIndex,displayNamesChoices[PlayerNumber()][equipIndex],actualChoicesInv[PlayerNumber()][equipIndex]);
+					}
+					
+					equipIndex++;
+				}
+				
+				Choice(equipIndex,"Back");
+			}
+		}
+
+		SetFont(menuPic);
+		HudMessage(s:"A";HUDMSG_PLAIN,menuImageId,CR_UNTRANSLATED,128.0,100.0,0);
+		
+		suspend;
+		if (onEquipMenu && equipping[PlayerNumber()] == 1)
+		{
+			if (actualChoicesInv[PlayerNumber()][currentchoice[PlayerNumber()]] > 0)
+			{
+				if (equippingWeapon[PlayerNumber()] == 1)
+				{
+					ClearWeapons();
+					str newWeapon = GetWeaponStr(actualChoices[PlayerNumber()][currentchoice[PlayerNumber()]]);
+					GiveInventory(newWeapon, 1);
+												
+					int strengthCalc = (CheckInventory("STR") / 2);
+					
+					int newWeaponDamage = strengthCalc + actualDamage[PlayerNumber()][currentchoice[PlayerNumber()]];
+					
+					if (newWeaponDamage < 1)
+					{
+						newWeaponDamage = 1;
+					}
+
+					if (IsBlackBelt())
+					{
+						if (StrIcmp(newWeapon, "FF_Unarmed") == 0)
+						{
+							newWeaponDamage = CheckInventory("Level") * 2;
+						}
+						else
+						{
+							newWeaponDamage++;
+						}
+					}
+					
+					TakeInventory("HeroDamage",999);							
+					GiveInventory("HeroDamage",newWeaponDamage);
+				}
+				if (equippingOffHand[PlayerNumber()] == 1 || equippingArmor[PlayerNumber()] == 1 || equippingHelm[PlayerNumber()] == 1 || equippingAcc[PlayerNumber()] == 1)
+				{
+					int newAbsorb = 0;
+					if (equippingOffHand[PlayerNumber()] == 1)
+					{
+						newAbsorb = actualDefOffHand[PlayerNumber()][currentchoice[PlayerNumber()]] + armorArray[equippedArmor[PlayerNumber()]] + helmArray[equippedArmor[PlayerNumber()]] + accArray[equippedArmor[PlayerNumber()]];
+					}
+					if (equippingArmor[PlayerNumber()] == 1)
+					{
+						newAbsorb = offHandArray[equippedOffHand[PlayerNumber()]] + actualDefArmor[PlayerNumber()][currentchoice[PlayerNumber()]] + helmArray[equippedArmor[PlayerNumber()]] + accArray[equippedArmor[PlayerNumber()]];
+						equippedArmor[PlayerNumber()] = GetArmorIndex(actualChoices[PlayerNumber()][currentchoice[PlayerNumber()]]);
+					}
+					if (equippingHelm[PlayerNumber()] == 1)
+					{
+						newAbsorb = offHandArray[equippedOffHand[PlayerNumber()]] + armorArray[equippedArmor[PlayerNumber()]] + actualDefHelm[PlayerNumber()][currentchoice[PlayerNumber()]] + accArray[equippedArmor[PlayerNumber()]];
+					}
+					if (equippingAcc[PlayerNumber()] == 1)
+					{
+						newAbsorb = offHandArray[equippedOffHand[PlayerNumber()]] + armorArray[equippedArmor[PlayerNumber()]] + helmArray[equippedArmor[PlayerNumber()]] + actualDefAcc[PlayerNumber()][currentchoice[PlayerNumber()]];
+					}
+					
+					TakeInventory("HeroAbsorb",999);
+					GiveInventory("HeroAbsorb",newAbsorb);
+				}
+			}
+			
+			equippingWeapon[PlayerNumber()] = 0;
+			equippingOffHand[PlayerNumber()] = 0;
+			equippingArmor[PlayerNumber()] = 0;
+			equippingHelm[PlayerNumber()] = 0;
+			equippingAcc[PlayerNumber()] = 0;
+			equipping[PlayerNumber()] = 0;
+			
+			Delay(1);
+		}
+		else
+		{
+			switch (currentchoice[PlayerNumber()])
+			{
+				case 0:
+					if (onEquipMenu)
+					{
+						equipping[PlayerNumber()] = 1;
+						equippingWeapon[PlayerNumber()] = 1;
+					}
+					break;
+				case 1:
+					if (onMainMenu)
+					{
+						if (class == "FIGHTER" || class == "THIEF" || class == "Bl BELT" || class == "MASTER")
+						{
+							choiceGood = false;
+						}
+					}
+					else if (onEquipMenu)
+					{
+						equipping[PlayerNumber()] = 1;
+						equippingOffHand[PlayerNumber()] = 1;
+					}
+					break;
+				case 2:
+					if (onMainMenu)
+					{
+						onMainMenu = false;
+						onEquipMenu = true;
+					}
+					else if (onEquipMenu)
+					{
+						equipping[PlayerNumber()] = 1;
+						equippingArmor[PlayerNumber()] = 1;
+					}
+					break;
+				case 3:
+					if (onMainMenu)
+					{
+						leave = true;
+					}
+					else if (onEquipMenu)
+					{
+						equipping[PlayerNumber()] = 1;
+						equippingHelm[PlayerNumber()] = 1;
+					}
+					break;
+				case 4:
+					if (onEquipMenu)
+					{
+						equipping[PlayerNumber()] = 1;
+						equippingAcc[PlayerNumber()] = 1;
+					}
+					break;
+				case 5:
+					if (onEquipMenu)
+					{
+						onMainMenu = true;
+						onEquipMenu = false;
+					}
+					break;
+			}
+		}
+
+		if (choiceGood)
+		{
+			LocalAmbientSound("cursor/select",127);
+		}
+		else
+		{
+			LocalAmbientSound("cursor/invalid",127);
+		}
+	}
+	
+	ClearCursor();
+
+	ClearMsg(9971);
+	index = 9900;
+	while (index <= 9920)
+	{
+		ClearMsg(index);
+		index++;
+	}
+	
+	index = 7000;
+	while (index <= 7100)
+	{
+		ClearMsg(index);
+		index++;
+	}
+	
+	SetPlayerProperty(0,0,PROP_TOTALLYFROZEN);
+}
+
+// --------------------------------------------------------------
+
+bool cancelEnterPlace = false;
+bool enteringScriptRunning = false;
+
+// teleport back to world
+script 1 (int placeNumber, int fromMap, int toMap)
+{
+    if (enteringScriptRunning)
+    {
+        terminate;
+    }
+		
+    enteringScriptRunning = true;
+	int playerStart = fromMap - 1;
+	
+	str map = "MAP01";
+	str mapStr = "WORLD";
+	
+	switch (toMap)
+	{
+		case 1:
+			map = "MAP01";
+			mapStr = "WORLD";
+			break;
+	}
+	
+	SetHudSize(256,200,0);
+    int smallCounter = 0;
+    int countdown = 3;
+    while (countdown > 0 && cancelEnterPlace == false)
+    {        
+		SetFont("nowenter"); // Change to other font
+        HudMessage(s:"A";HUDMSG_FADEOUT,2,CR_UNTRANSLATED,128.0,100.0,0.16);
+		
+		SetFont("FF_FONT1");
+        HudMessage(s:mapStr;HUDMSG_FADEOUT,1,CR_UNTRANSLATED,128.0,100.0,0.16);
+        HudMessage(d:countdown;HUDMSG_FADEOUT,0,CR_UNTRANSLATED,128.0,116.0,0.03);
+
+        Delay(5);
+        smallCounter++;
+        if (smallCounter == 7)
+        {
+            smallCounter = 0;
+            countdown--;
+        }
+    }
+    
+	enteringScriptRunning = false;
+	
+    if (cancelEnterPlace)
+    {
+        terminate;
+    }
+	
+	cancelEnterPlace = false;
+		
+	ChangeLevel(map,playerStart,CHANGELEVEL_NOINTERMISSION);
+}
+
+script 2 (void)
+{
+    if (enteringScriptRunning)
+    {
+        cancelEnterPlace = true;
+        enteringScriptRunning = false;
+        Delay(6);
+        cancelEnterPlace = false;
+    }
+}
+
+bool showingMessage = false;
+script 3 (int messageNumber)
+{
+	if (showingMessage)
+	{
+		HudMessage(s:"";HUDMSG_PLAIN,1,CR_UNTRANSLATED,128.0,100.0,0);
+		SetPlayerProperty(0,0,PROP_TOTALLYFROZEN);
+		showingMessage = false;
+		terminate;
+	}
+
+	showingMessage = true;
+	str messageImage = "";
+	switch (messageNumber)
+	{
+		case 1:
+			messageImage = "MESGG001"; // Coneria fountain
+			break;
+		case 2:
+			messageImage = "MESGG002"; // Coneria well
+			break;
+	}
+	
+	Thing_Stop(0);
+	SetPlayerProperty(0,1,PROP_TOTALLYFROZEN);
+	SetHudSize(256,200,0);
+	SetFont(messageImage);
+	HudMessage(s:"A";HUDMSG_PLAIN,1,CR_UNTRANSLATED,128.0,100.0,0);
+}
+
+function str GetClass ( void )
+{
+	str class = "";
+	if (IsKnight())
+	{
+		class = "KNIGHT";
+	}
+	else if (IsFighter())
+	{
+		class = "FIGHTER";
+	}
+	else if (IsNinja())
+	{
+		class = "NINJA";
+	}
+	else if (IsThief())
+	{
+		class = "THIEF";
+	}
+	else if (IsMaster())
+	{
+		class = "MASTER";
+	}
+	else if (IsBlackBelt())
+	{
+		class = "Bl BELT";
+	}
+	else if (IsRedWizard())
+	{
+		class = "Red WIZ";
+	}
+	else if (IsRedMage())
+	{
+		class = "RedMage";
+	}
+	else if (IsWhiteWizard())
+	{
+		class = "Wh WIZ";
+	}
+	else if (IsWhiteMage())
+	{
+		class = "Wh MAGE";
+	}
+	else if (IsBlackWizard())
+	{
+		class = "Bl WIZ";
+	}
+	else if (IsBlackMage())
+	{
+		class = "Bl MAGE";
+	}
+
+	return class;
+}
+
+function str GetPlayerPic ( void )
+{
+	str playerPic = "";
+	if (IsKnight())
+	{
+		playerPic = "KNIT";
+	}
+	else if (IsFighter())
+	{
+		playerPic = "FITE";
+	}
+	else if (IsNinja())
+	{
+		playerPic = "NINJ";
+	}
+	else if (IsThief())
+	{
+		playerPic = "THEF";
+	}
+	else if (IsMaster())
+	{
+		playerPic = "MAST";
+	}
+	else if (IsBlackBelt())
+	{
+		playerPic = "BELT";
+	}
+	else if (IsRedWizard())
+	{
+		playerPic = "RWIZ";
+	}
+	else if (IsRedMage())
+	{
+		playerPic = "RMGE";
+	}
+	else if (IsWhiteWizard())
+	{
+		playerPic = "WWIZ";
+	}
+	else if (IsWhiteMage())
+	{
+		playerPic = "WMGE";
+	}
+	else if (IsBlackWizard())
+	{
+		playerPic = "BWIZ";
+	}
+	else if (IsBlackMage())
+	{
+		playerPic = "BMGE";
+	}
+	
+	return playerPic;
+}
+
+script 4 (int buildingType) // shops
+{
+	thisScript[PlayerNumber()] = 4;
+
+	if (inShop[PlayerNumber()] == 1)
+	{
+		terminate;
+	}
+	
+	inShop[PlayerNumber()] = 1;
+
+	Thing_Stop(0);
+	SetPlayerProperty(0,1,PROP_TOTALLYFROZEN);
+
+	LocalAmbientSound("env/dooropen1",127);
+	SetLineTexture(buildingType, SIDE_FRONT, TEXTURE_BOTTOM, "TWN-DOR2");
+	
+	int innPrice = 0;
+	
+	str shopImage = "";
+	
+	int shopImageId = 9985;
+	int innPriceId = 9950;
+	int playerGoldId = 9940;
+	int playerPicId = 9930;
+
+	int item1PriceId = 9921;
+	int item2PriceId = 9922;
+	int item3PriceId = 9923;
+	int item4PriceId = 9924;
+	int item5PriceId = 9925;
+		
+	choiceSpacing[PlayerNumber()] = 16.0;
+
+	ClearMainMenuChoices();
+	ClearMenuChoices();
+	
+	int index = 0;
+
+	switch (buildingType)
+	{
+		case 1: // Inn
+			shopImage = "sinn";
+			shopMainMenuChoices[PlayerNumber()][0] = "Yes";
+			shopMainMenuChoices[PlayerNumber()][1] = "No";
+			break;
+		case 2: // Armor
+			shopImage = "sarmo";
+			shopMainMenuChoices[PlayerNumber()][0] = "Buy";
+			shopMainMenuChoices[PlayerNumber()][1] = "Sell";
+			shopMainMenuChoices[PlayerNumber()][2] = "Exit";
+			break;
+		case 3: // Weapon
+			shopImage = "sweap";
+			shopMainMenuChoices[PlayerNumber()][0] = "Buy";
+			shopMainMenuChoices[PlayerNumber()][1] = "Sell";
+			shopMainMenuChoices[PlayerNumber()][2] = "Exit";
+			break;
+		case 4: // Item
+			shopImage = "sitem";
+			break;
+		case 5: // Black Magic
+			shopImage = "sbmag";
+			break;
+		case 6: // White Magic
+			shopImage = "swmag";
+			break;
+		case 7: // Clinic
+			shopImage = "sclin";
+			break;
+	}
+	
+	/*
+		"[" FF-armor
+		"]" FF-brace
+		";" FF-helm
+		":" FF-knif
+		"," FF-nunch
+		"." FF-shiel
+		"<" FF-staff
+		">" FF-sword
+		"?" FF-hammr
+		"/" FF-potn
+	*/
+	
+	switch (GetLevelInfo(LEVELINFO_LEVELNUM))
+	{
+		case 2: // Coneria Town
+			innPrice = 30;
+			switch (buildingType)
+			{
+				case 2: // Armor
+					shopChoices[PlayerNumber()][0] = "Cloth";
+					shopPrices[PlayerNumber()][0] = 10;
+					shopChoices[PlayerNumber()][1] = "Wooden[";
+					shopPrices[PlayerNumber()][1] = 50;
+					shopChoices[PlayerNumber()][2] = "Chain [";
+					shopPrices[PlayerNumber()][2] = 80;
+					
+					actualItemBought[PlayerNumber()][0] = "FF_ClothInventory";
+					actualItemBought[PlayerNumber()][1] = "FF_WoodenArmorInventory";
+					actualItemBought[PlayerNumber()][2] = "FF_ChainArmorInventory";
+					break;
+				case 3: // Weapon
+					shopChoices[PlayerNumber()][0] = "Wooden<";
+					shopPrices[PlayerNumber()][0] = 5;
+					shopChoices[PlayerNumber()][1] = "Small :";
+					shopPrices[PlayerNumber()][1] = 5;
+					shopChoices[PlayerNumber()][2] = "Wooden,";
+					shopPrices[PlayerNumber()][2] = 10;
+					shopChoices[PlayerNumber()][3] = "Rapier";
+					shopPrices[PlayerNumber()][3] = 10;
+					shopChoices[PlayerNumber()][4] = "Iron ?";
+					shopPrices[PlayerNumber()][4] = 10;
+
+					actualItemBought[PlayerNumber()][0] = "FF_WoodenStaffInventory";
+					actualItemBought[PlayerNumber()][1] = "FF_SmallDaggerInventory";
+					actualItemBought[PlayerNumber()][2] = "FF_WoodenNunchuckInventory";
+					actualItemBought[PlayerNumber()][3] = "FF_RapierInventory";
+					actualItemBought[PlayerNumber()][4] = "FF_IronHammerInventory";
+					break;
+				case 4: // Item
+					shopChoices[PlayerNumber()][0] = "Heal /";
+					shopPrices[PlayerNumber()][0] = 60;
+					shopChoices[PlayerNumber()][1] = "Pure /";
+					shopPrices[PlayerNumber()][1] = 75;
+					shopChoices[PlayerNumber()][2] = "Tent";
+					shopPrices[PlayerNumber()][2] = 75;
+
+					actualItemBought[PlayerNumber()][0] = "";
+					actualItemBought[PlayerNumber()][1] = "";
+					actualItemBought[PlayerNumber()][2] = "";
+					break;
+				case 5: // Black Magic
+					shopChoices[PlayerNumber()][0] = "Fire";
+					shopPrices[PlayerNumber()][0] = 100;
+					shopChoices[PlayerNumber()][1] = "Slep";
+					shopPrices[PlayerNumber()][1] = 100;
+					shopChoices[PlayerNumber()][2] = "Lock";
+					shopPrices[PlayerNumber()][2] = 100;
+					shopChoices[PlayerNumber()][3] = "Lit";
+					shopPrices[PlayerNumber()][3] = 100;
+
+					actualItemBought[PlayerNumber()][0] = "";
+					actualItemBought[PlayerNumber()][1] = "";
+					actualItemBought[PlayerNumber()][2] = "";
+					actualItemBought[PlayerNumber()][3] = "";
+					break;
+				case 6: // White Magic
+					shopChoices[PlayerNumber()][0] = "Cure";
+					shopPrices[PlayerNumber()][0] = 100;
+					shopChoices[PlayerNumber()][1] = "Harm";
+					shopPrices[PlayerNumber()][1] = 100;
+					shopChoices[PlayerNumber()][2] = "Fog";
+					shopPrices[PlayerNumber()][2] = 100;
+					shopChoices[PlayerNumber()][3] = "Ruse";
+					shopPrices[PlayerNumber()][3] = 100;
+
+					actualItemBought[PlayerNumber()][0] = "";
+					actualItemBought[PlayerNumber()][1] = "";
+					actualItemBought[PlayerNumber()][2] = "";
+					actualItemBought[PlayerNumber()][3] = "";
+					break;
+				case 7: // Clinic
+					break;
+			}
+			break;
+	}	
+			
+	Delay(10);
+	
+	SetHudSize(256,200,0);
+
+	SetMusic("shop");
+	
+	SetFont(GetPlayerPic());
+	HudMessage(s:"A";HUDMSG_PLAIN,playerPicId,CR_UNTRANSLATED,144.0,73.0,0);
+	
+	SetFont("FF_FONT1");
+	HudMessage(d:CheckInventory("Gold"),s:" G";HUDMSG_PLAIN,playerGoldId,CR_UNTRANSLATED,184.0,182.0,0);
+
+	SetFont(shopImage);
+	HudMessage(s:"A";HUDMSG_PLAIN,shopImageId,CR_UNTRANSLATED,128.0,100.0,0);
+
+	bool choiceGood = false;
+
+	menuX[PlayerNumber()] = -999.0;
+	menuY[PlayerNumber()] = -999.0;
+	cursorX[PlayerNumber()] = 48.0;
+	cursorY[PlayerNumber()] = 141.0;
+
+	SetMainMenuChoices();
+	bool onMainMenu = true;
+
+	ACS_Execute(CURSOR,0);
+	menu[PlayerNumber()] = 1;
+
+	switch (buildingType)
+	{
+		case 1: // inn
+			SetFont("FF_FONT1");
+			HudMessage(d:innPrice,s:" G";HUDMSG_PLAIN,innPriceId,CR_UNTRANSLATED,44.0,52.0,0);			
+			
+			while (!choiceGood)
+			{
+				index = 0;
+				while (index < 3)
+				{
+					if (shopMainMenuChoices[PlayerNumber()][index] == "")
+					{
+						break;
+					}
+					Choice(index, shopMainMenuChoices[PlayerNumber()][index]);
+					index++;
+				}
+				
+				index = 0;
+				suspend;
+				
+				LocalAmbientSound("cursor/select",127);
+				switch (currentchoice[PlayerNumber()])
+				{
+					case 0:
+						if (CheckInventory("Gold") >= innPrice && GetActorProperty(0, APROP_SpawnHealth) > GetActorProperty(0, APROP_Health))
+						{
+							HealThing(999);
+							TakeInventory("Gold",innPrice);
+							choiceGood = true;
+							
+							LocalAmbientSound("misc/jingle",127);
+							SetFont("FF_FONT1");
+							HudMessage(d:CheckInventory("Gold"),s:" G";HUDMSG_PLAIN,playerGoldId,CR_UNTRANSLATED,204.0,180.0,0);
+							Delay(50);
+						}
+						else
+						{
+							LocalAmbientSound("cursor/invalid",127);
+						}
+						break;
+					default:
+						choiceGood = true;
+						break;
+				}
+			}
+			break;
+		case 2: // Armor
+		case 3: // Weapon
+			bool leave = false;
+			bool buying = false;
+			bool selling = false;
+			bool itemsSet = false;
+			while (!leave)
+			{
+				int gold = CheckInventory("Gold");
+				SetFont("FF_FONT1");
+				HudMessage(d:gold,s:" G";HUDMSG_PLAIN,playerGoldId,CR_UNTRANSLATED,184.0,182.0,0);
+				choiceGood = true;
+				if (onMainMenu)
+				{
+					itemsSet = false;
+					buying = false;
+					selling = false;
+					SetMainMenuChoices();
+					cursorX[PlayerNumber()] = 48.0;
+					cursorY[PlayerNumber()] = 141.0;
+					menuX[PlayerNumber()] = -999.0;
+					menuY[PlayerNumber()] = -999.0;
+					choiceSpacing[PlayerNumber()] = 16.0;
+				}
+				else
+				{
+					if (!itemsSet)
+					{
+						if (buying)
+						{
+							SetShopChoices();
+						}
+						else if (selling)
+						{
+							SetSellChoices();
+						}
+						itemsSet = true;
+						cursorX[PlayerNumber()] = 176.0;
+						cursorY[PlayerNumber()] = 20.0;
+					}
+				}
+				suspend;
+				switch (currentchoice[PlayerNumber()])
+				{
+					default:					
+						if (onMainMenu)
+						{
+							choiceSpacing[PlayerNumber()] = 24.0;
+							switch (currentchoice[PlayerNumber()])
+							{
+								case 0:
+									buying = true;
+									onMainMenu = false;
+									menuX[PlayerNumber()] = 213.0;
+									menuY[PlayerNumber()] = 18.0;
+									break;
+								case 1:
+									selling = true;
+									onMainMenu = false;
+									menuX[PlayerNumber()] = 213.0;
+									menuY[PlayerNumber()] = 18.0;
+									SetSellChoices();
+									break;
+								case 2:
+									leave = true;
+									break;
+							}
+						}
+						else
+						{
+							if (buying)
+							{
+								if (shopPrices[PlayerNumber()][currentchoice[PlayerNumber()]] == 0)
+								{
+									onMainMenu = true;
+									menuX[PlayerNumber()] = -999.0;
+									menuY[PlayerNumber()] = -999.0;
+									choiceSpacing[PlayerNumber()] = 16.0;
+								}
+								else
+								{
+									if (shopPrices[PlayerNumber()][currentchoice[PlayerNumber()]] <= gold)
+									{
+										TakeInventory("Gold", shopPrices[PlayerNumber()][currentchoice[PlayerNumber()]]);
+										GiveInventory(actualItemBought[PlayerNumber()][currentchoice[PlayerNumber()]], 1);
+									}
+									else
+									{
+										choiceGood = false;
+									}
+								}
+							}
+							if (selling)
+							{
+								if (sellPrices[PlayerNumber()][currentchoice[PlayerNumber()]] == 0)
+								{
+									onMainMenu = true;
+									menuX[PlayerNumber()] = -999.0;
+									menuY[PlayerNumber()] = -999.0;
+									choiceSpacing[PlayerNumber()] = 16.0;
+								}
+							}
+						}
+						break;
+				}
+				
+				if (choiceGood)
+				{
+					LocalAmbientSound("cursor/select",127);
+				}
+				else
+				{
+					LocalAmbientSound("cursor/invalid",127);
+				}
+			}
+			break;
+			break;
+		case 4: // Item
+			break;
+		case 5: // Black Magic
+			break;
+		case 6: // White Magic
+			break;
+		case 7: // Clinic
+			break;
+	}
+	
+	ClearCursor();
+
+	LocalAmbientSound("env/doorclose1",127);
+
+	ClearMsg(shopImageId);
+	ClearMsg(innPriceId);
+	ClearMsg(playerGoldId);
+	ClearMsg(playerPicId);
+	
+	SetLineTexture(buildingType, SIDE_FRONT, TEXTURE_BOTTOM, "TWN-DOOR");
+	SetPlayerProperty(0,0,PROP_TOTALLYFROZEN);
+
+	SetMusic("town");
+	
+	inShop[PlayerNumber()] = 0;
+}
+
+script 5 (int weaponDamage) // weapon damage
+{
+    int damage = CheckInventory("HeroDamage");
+
+    int multiplier = random(0.6, 1.4);
+
+	if (IsBlackBelt())
+	{
+		if (CheckWeapon("FF_Unarmed"))
+		{
+			damage = ((CheckInventory("Level") * 2) * multiplier) / 65535;
+		}		
+		else
+		{
+			damage = ((damage * multiplier) / 65535) + 1;
+		}
+	}
+	else
+	{
+		damage = (damage * multiplier) / 65535;
+	}
+    	
+    SetResultValue(damage);
+}
+
+script 6 ( void ) // Unarmed Black Belt number of hits
+{
+	int hitPercent = CheckInventory("HeroHit") / 32;
+			
+	int maxNumberOfHits = 2 * (1 + hitPercent);
+	
+	int numberOfHits = random(1,maxNumberOfHits);
+	
+	GiveInventory("NumberOfHits",numberOfHits);
+}
+
+script 7 ( void ) // Armor
+{
+	int offHandIndex = equippedOffHand[PlayerNumber()];
+	int equipArmorIndex = equippedArmor[PlayerNumber()];
+	int equipHelmIndex = equippedHelm[PlayerNumber()];
+	int equipAccIndex = equippedAcc[PlayerNumber()];
+	
+	int absorb = offHandArray[offHandIndex] + armorArray[equipArmorIndex] + helmArray[equipHelmIndex] + accArray[equipAccIndex];
+	if (CheckInventory("HeroAbsorb") != absorb)
+	{
+		TakeInventory("HeroAbsorb",999);
+		GiveInventory("HeroAbsorb",absorb);
+	}
+	if (CheckInventory("Armor") != absorb)
+	{
+		TakeInventory("Armor",999);
+		GiveInventory("Absorb",absorb);
+	}
+	
+}
+
+script 8 ( int defense ) // Enemy Defense
+{
+	if (CheckInventory("Armor") != defense)
+	{
+		TakeInventory("Armor",999);
+		GiveInventory("Absorb",defense);
+	}
+	Delay(1);
+	restart;
+}

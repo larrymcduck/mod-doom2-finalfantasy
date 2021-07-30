@@ -1,0 +1,36 @@
+actor BFG9000_2 replaces BFG9000
+{
+}
+
+actor Chaingun_2 replaces Chaingun
+{
+}
+
+actor Chainsaw_2 replaces Chainsaw
+{
+}
+
+actor Fist_2 replaces Fist
+{
+}
+
+actor Pistol_2 replaces Pistol
+{
+}
+
+actor PlasmaRifle_2 replaces PlasmaRifle
+{
+}
+
+actor RocketLauncher_2 replaces RocketLauncher
+{
+}
+
+actor Shotgun_2 replaces Shotgun
+{
+}
+
+actor SuperShotgun_2 replaces SuperShotgun
+{
+}
+

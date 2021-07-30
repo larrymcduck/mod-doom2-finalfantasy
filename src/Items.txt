@@ -1,0 +1,679 @@
+Actor MaxHp : UpgradeStamina
+{
+	Inventory.MaxAmount 966
+}
+
+Actor MaxHpItem : Inventory
+{
+	Inventory.MaxAmount 999
+}
+
+Actor Gold : Inventory
+{
+	Inventory.MaxAmount 999999
+}
+
+Actor Level : Inventory
+{
+	Inventory.MaxAmount 50
+}
+
+Actor Exp : Inventory
+{
+	Inventory.MaxAmount 999999
+}
+
+Actor MaxExp : CustomInventory
+{
+	States
+	{
+		Spawn:
+			TNT1 A -1
+			stop
+		Pickup:
+			TNT1 A 0 A_GiveInventory("EXP",999999)
+			stop
+	}
+}
+
+Actor FF_Inv1 : Inventory
+{
+	Inventory.MaxAmount 1
+}
+
+Actor HeroStat : Inventory
+{
+	Inventory.MaxAmount 255
+}
+
+Actor STR : HeroStat
+{
+}
+
+Actor AGL : HeroStat
+{
+}
+
+Actor INT : HeroStat
+{
+}
+
+Actor VIT : HeroStat
+{
+}
+
+Actor LUCK : HeroStat
+{
+}
+
+Actor HeroDamage : HeroStat
+{
+}
+
+Actor HeroHit : HeroStat
+{
+}
+
+Actor HeroAbsorb : HeroStat
+{
+}
+
+Actor Absorb : BasicArmorPickup
+{
+	Inventory.MaxAmount 255
+	Armor.SavePercent 99.9
+	Armor.SaveAmount 1
+}
+
+Actor IsFighter : FF_Inv1
+{
+}
+
+Actor IsThief : FF_Inv1
+{
+}
+
+Actor IsBlackBelt : FF_Inv1
+{
+}
+
+Actor IsRedMage : FF_Inv1
+{
+}
+
+Actor IsWhiteMage : FF_Inv1
+{
+}
+
+Actor IsBlackMage : FF_Inv1
+{
+}
+
+Actor IsKnight : FF_Inv1
+{
+}
+
+Actor IsNinja : FF_Inv1
+{
+}
+
+Actor IsMaster : FF_Inv1
+{
+}
+
+Actor IsRedWizard : FF_Inv1
+{
+}
+
+Actor IsWhiteWizard : FF_Inv1
+{
+}
+
+Actor IsBlackWizard : FF_Inv1
+{
+}
+
+Actor NumberOfHits : Inventory
+{
+}
+
+// - KEY ITEMS -
+
+Actor EarthOrb : FF_Inv1
+{
+}
+
+Actor FireOrb : FF_Inv1
+{
+}
+
+Actor WaterOrb : FF_Inv1
+{
+}
+
+Actor AirOrb : FF_Inv1
+{
+}
+
+//
+
+// - WEAPONS -
+
+Actor FF_Inventory : Inventory
+{
+	Inventory.MaxAmount 99
+}
+
+Actor FF_UnarmedInventory : FF_Inventory
+{
+}
+
+Actor FF_Unarmed : Weapon
+{
+	States
+	{
+		Spawn:
+			TNT1 A -1
+			Stop
+		Ready:
+			TNT1 A 0 A_JumpIfInventory("IsFighter",1,"FighterReady")
+			TNT1 A 0 A_JumpIfInventory("IsNinja",1,"NinjaReady")
+			TNT1 A 0 A_JumpIfInventory("IsThief",1,"ThiefReady")
+			TNT1 A 0 A_JumpIfInventory("IsBlackBelt",1,"BlackBeltReady")
+			TNT1 A 0 A_JumpIfInventory("IsRedMage",1,"RedMageReady")
+			TNT1 A 0 A_JumpIfInventory("IsWhiteMage",1,"WhiteMageReady")
+			TNT1 A 0 A_JumpIfInventory("IsBlackMage",1,"BlackMageReady")
+		FighterReady:
+			FUNA A 1 A_WeaponReady
+			Goto Ready
+		ThiefReady:
+			TUNA A 1 A_WeaponReady
+			loop
+		BlackBeltReady:
+			BBUN A 1 A_WeaponReady
+			loop
+		RedMageReady:
+			FUNA A 1 A_WeaponReady
+			loop
+		WhiteMageReady:
+			WUNA A 1 A_WeaponReady
+			loop
+		BlackMageReady:
+			BLUN A 1 A_WeaponReady
+			loop
+		NinjaReady:
+			FUNA A 1 A_WeaponReady
+			loop
+		Select:
+			TNT1 A 0 A_JumpIfInventory("IsFighter",1,"FighterSelect")
+			TNT1 A 0 A_JumpIfInventory("IsNinja",1,"NinjaSelect")
+			TNT1 A 0 A_JumpIfInventory("IsThief",1,"ThiefSelect")
+			TNT1 A 0 A_JumpIfInventory("IsBlackBelt",1,"BlackBeltSelect")
+			TNT1 A 0 A_JumpIfInventory("IsRedMage",1,"RedMageSelect")
+			TNT1 A 0 A_JumpIfInventory("IsWhiteMage",1,"WhiteMageSelect")
+			TNT1 A 0 A_JumpIfInventory("IsBlackMage",1,"BlackMageSelect")
+		FighterSelect:
+			FUNA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Raise
+			FUNA A 1 A_Raise
+			loop
+		ThiefSelect:
+			TUNA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Raise
+			TUNA A 1 A_Raise
+			loop
+		BlackBeltSelect:
+			BBUN AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Raise
+			BBUN A 1 A_Raise
+			loop
+		RedMageSelect:
+			FUNA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Raise
+			FUNA A 1 A_Raise
+			loop
+		WhiteMageSelect:
+			WUNA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Raise
+			WUNA A 1 A_Raise
+			loop
+		BlackMageSelect:
+			BLUN AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Raise
+			BLUN A 1 A_Raise
+			loop
+		NinjaSelect:
+			FUNA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Raise
+			FUNA A 1 A_Raise
+			loop
+		Deselect:
+			TNT1 A 0 A_JumpIfInventory("IsFighter",1,"FighterDeselect")
+			TNT1 A 0 A_JumpIfInventory("IsNinja",1,"NinjaDeselect")
+			TNT1 A 0 A_JumpIfInventory("IsThief",1,"ThiefDeselect")
+			TNT1 A 0 A_JumpIfInventory("IsBlackBelt",1,"BlackBeltDeselect")
+			TNT1 A 0 A_JumpIfInventory("IsRedMage",1,"RedMageDeselect")
+			TNT1 A 0 A_JumpIfInventory("IsWhiteMage",1,"WhiteMageDeselect")
+			TNT1 A 0 A_JumpIfInventory("IsBlackMage",1,"BlackMageDeselect")
+		FighterDeselect:
+			FUNA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Lower
+			FUNA A 1 A_Lower
+			loop
+		ThiefDeselect:
+			TUNA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Lower
+			TUNA A 1 A_Lower
+			loop
+		BlackBeltDeselect:
+			BBUN AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Lower
+			BBUN A 1 A_Lower
+			loop
+		RedMageDeselect:
+			FUNA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Lower
+			FUNA A 1 A_Lower
+			loop
+		WhiteMageDeselect:
+			WUNA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Lower
+			WUNA A 1 A_Lower
+			loop
+		BlackMageDeselect:
+			BLUN AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Lower
+			BLUN A 1 A_Lower
+			loop
+		NinjaDeselect:
+			FUNA AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Lower
+			FUNA A 1 A_Lower
+			loop
+		Fire:
+			TNT1 A 0 A_JumpIfInventory("IsFighter",1,"FighterFire")
+			TNT1 A 0 A_JumpIfInventory("IsNinja",1,"NinjaFire")
+			TNT1 A 0 A_JumpIfInventory("IsThief",1,"ThiefFire")
+			TNT1 A 0 A_JumpIfInventory("IsBlackBelt",1,"BlackBeltFire")
+			TNT1 A 0 A_JumpIfInventory("IsRedMage",1,"RedMageFire")
+			TNT1 A 0 A_JumpIfInventory("IsWhiteMage",1,"WhiteMageFire")
+			TNT1 A 0 A_JumpIfInventory("IsBlackMage",1,"BlackMageFire")
+		FighterFire:
+			FUNA B 5 Offset(5, 40)
+			FUNA C 4 Offset(5, 40)
+			FUNA D 4 Offset(5, 40) A_CustomPunch(ACS_ExecuteWithResult(5,0), 1, 0, "WeaponHitPuff", 48)
+			FUNA C 4 Offset(5, 40)
+			FUNA B 4 Offset(5, 40) A_ReFire
+			Goto FighterReady
+		ThiefFire:
+			TUNA B 5 Offset(5, 40)
+			TUNA C 4 Offset(5, 40)
+			TUNA D 4 Offset(5, 40) A_CustomPunch(ACS_ExecuteWithResult(5,0), 1, 0, "WeaponHitPuff", 48)
+			TUNA C 4 Offset(5, 40)
+			TUNA B 4 Offset(5, 40) A_ReFire
+			Goto ThiefReady
+		BlackBeltFire:
+			BBUN B 0 A_TakeInventory("NumberOfHits",9999)
+			BBUN B 1 ACS_Execute(6)
+			BBUN B 1 A_JumpIfInventory("NumberOfHits",2,"BlackBeltFire2")
+			BBUN B 2
+			BBUN C 4 A_CustomPunch(ACS_ExecuteWithResult(5,0), 1, 0, "WeaponHitPuff", 64)
+			BBUN D 5 
+			BBUN C 4
+			BBUN B 5 A_ReFire
+			Goto BlackBeltReady
+		BlackBeltFire2:
+			BBUN B 1 A_TakeInventory("NumberOfHits",1)
+			BBUN B 1
+			BBUN C 2 A_CustomPunch(ACS_ExecuteWithResult(5,0), 1, 0, "WeaponHitPuff", 64)
+			BBUN D 1 
+			BBUN C 2
+			BBUN B 8 A_JumpIfInventory("NumberOfHits",1,"BlackBeltFire3")			
+			Goto BlackBeltReady
+		BlackBeltFire3:
+			BBUN E 1 A_TakeInventory("NumberOfHits",1)
+			BBUN E 1
+			BBUN F 2 A_CustomPunch(ACS_ExecuteWithResult(5,0), 1, 0, "WeaponHitPuff", 64)
+			BBUN G 1 
+			BBUN F 2
+			BBUN E 8 A_JumpIfInventory("NumberOfHits",1,"BlackBeltFire2")
+			Goto BlackBeltReady
+		RedMageFire:
+			RUNA B 5 Offset(5, 40)
+			RUNA C 4 Offset(5, 40)
+			RUNA D 4 Offset(5, 40) A_CustomPunch(ACS_ExecuteWithResult(5,0), 1, 0, "WeaponHitPuff", 48)
+			RUNA C 4 Offset(5, 40)
+			RUNA B 4 Offset(5, 40) A_ReFire
+			Goto RedMageReady
+		WhiteMageFire:
+			WUNA B 5 Offset(5, 40)
+			WUNA C 4 Offset(5, 40)
+			WUNA D 4 Offset(5, 40) A_CustomPunch(ACS_ExecuteWithResult(5,0), 1, 0, "WeaponHitPuff", 48)
+			WUNA C 4 Offset(5, 40)
+			WUNA B 4 Offset(5, 40) A_ReFire
+			Goto WhiteMageReady
+		BlackMageFire:
+			BLUN B 5 Offset(5, 40)
+			BLUN C 4 Offset(5, 40)
+			BLUN D 4 Offset(5, 40) A_CustomPunch(ACS_ExecuteWithResult(5,0), 1, 0, "WeaponHitPuff", 48)
+			BLUN C 4 Offset(5, 40)
+			BLUN B 4 Offset(5, 40) A_ReFire
+			Goto BlackMageReady
+	}
+}
+
+Actor FF_WoodenStaffInventory : FF_Inventory
+{
+}
+
+Actor FF_WoodenStaff : Weapon
+{
+	// Damage 6
+	States
+	{
+		Spawn:
+			TNT1 A -1
+			Stop
+		Ready:
+			FWST A 1 A_WeaponReady
+			loop
+		Select:
+			FWST AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Raise
+			FWST A 1 A_Raise
+			loop
+		Deselect:
+			FWST AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Lower
+			FWST A 1 A_Lower
+			loop
+		Fire:
+			TNT1 A 0 A_JumpIfInventory("IsFighter",1,"FighterFire")
+			TNT1 A 0 A_JumpIfInventory("IsNinja",1,"NinjaFire")
+			TNT1 A 0 A_JumpIfInventory("IsWhiteMage",1,"WhiteMageFire")
+		FighterFire:
+			FWST B 3
+			FWST C 2
+			FWST D 3 A_CustomPunch(ACS_ExecuteWithResult(5,6), 1, 0, "WeaponHitPuff", 128)
+			Goto Finish
+		NinjaFire:
+			NWST B 3
+			NWST C 2
+			NWST D 3 A_CustomPunch(ACS_ExecuteWithResult(5,6), 1, 0, "WeaponHitPuff", 128)
+			Goto Finish
+		WhiteMageFire:
+			WWST B 3
+			WWST C 2
+			WWST D 3 A_CustomPunch(ACS_ExecuteWithResult(5,6), 1, 0, "WeaponHitPuff", 128)
+			Goto Finish
+		Finish:
+			FWST E 2
+			TNT1 A 2
+			TNT1 A 10
+			FWST A 1 Offset(0, 60)
+			FWST A 1 Offset(0, 55)
+			FWST A 1 Offset(0, 50)
+			FWST A 1 Offset(0, 45)
+			FWST A 1 Offset(0, 40)
+			Goto Ready
+	}
+}
+
+Actor FF_SmallDaggerInventory : FF_Inventory
+{
+}
+
+Actor FF_SmallDagger : Weapon
+{
+	+BLOODSPLATTER
+	// Damage 5
+	States
+	{
+		Spawn:
+			TNT1 A -1
+			Stop
+		Ready:
+			FSDG A 1 A_WeaponReady
+			loop
+		Select:
+			FSDG AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Raise
+			FSDG A 1 A_Raise
+			loop
+		Deselect:
+			FSDG AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Lower
+			FSDG A 1 A_Lower
+			loop
+		Fire:
+			TNT1 A 0 A_JumpIfInventory("IsFighter",1,"FighterFire")
+			TNT1 A 0 A_JumpIfInventory("IsNinja",1,"NinjaFire")
+			TNT1 A 0 A_JumpIfInventory("IsThief",1,"ThiefFire")
+			TNT1 A 0 A_JumpIfInventory("IsRedMage",1,"RedMageFire")
+			TNT1 A 0 A_JumpIfInventory("IsBlackMage",1,"BlackMageFire")
+		NinjaFire:
+			NSDG B 2
+			NSDG C 2
+			Goto Finish
+		RedMageFire:
+			RSDG B 2
+			RSDG C 2
+			Goto Finish
+		BlackMageFire:
+			BSDG B 2
+			BSDG C 2
+			Goto Finish
+		FighterFire:
+			FSDG B 2
+			FSDG C 2
+			Goto Finish
+		ThiefFire:
+			TSDG B 2
+			TSDG C 2
+			Goto Finish
+		Finish:
+			FSDG D 2 A_CustomPunch(ACS_ExecuteWithResult(5,5), 1, 0, "WeaponHitPuff", 64)
+			TNT1 A 8 Offset(0, 150)
+			FSDG A 1 Offset(0, 60)
+			FSDG A 1 Offset(0, 55)
+			FSDG A 1 Offset(0, 50)
+			FSDG A 1 Offset(0, 45)
+			FSDG A 1 Offset(0, 40)
+			Goto Ready
+	}
+}
+
+Actor FF_WoodenNunchuckInventory : FF_Inventory
+{
+}
+
+Actor FF_WoodenNunchuck : Weapon
+{
+	// Damage 12
+	States
+	{
+		Spawn:
+			TNT1 A -1
+			Stop
+		Ready:
+			BBWN A 1 A_WeaponReady
+			loop
+		Select:
+			BBWN AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Raise
+			BBWN A 1 A_Raise
+			loop
+		Deselect:
+			BBWN AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Lower
+			BBWN A 1 A_Lower
+			loop
+		Fire:
+			TNT1 A 2
+			TNT1 A 0 A_JumpIfInventory("IsBlackBelt",1,"BlackBeltFire")
+			TNT1 A 0 A_JumpIfInventory("IsNinja",1,"NinjaFire")
+		BlackBeltFire:
+			BBWN B 3
+			BBWN C 3
+			BBWN D 3 A_CustomPunch(ACS_ExecuteWithResult(5,12), 1, 0, "WeaponHitPuff", 96)
+			Goto Finish
+		NinjaFire:
+			TRAP B 3
+			TRAP C 3
+			TRAP D 3 A_CustomPunch(ACS_ExecuteWithResult(5,12), 1, 0, "WeaponHitPuff", 96)
+			Goto Finish
+		Finish:
+			TNT1 A 5
+			TNT1 A 5 A_ReFire
+			BBWN A 1 Offset(0, 60)
+			BBWN A 1 Offset(0, 55)
+			BBWN A 1 Offset(0, 50)
+			BBWN A 1 Offset(0, 45)
+			BBWN A 1 Offset(0, 40)
+			Goto Ready
+	}
+}
+
+Actor FF_RapierInventory : FF_Inventory
+{
+}
+
+Actor FF_Rapier : Weapon
+{
+	+BLOODSPLATTER
+	// Damage 9
+	Weapon.YAdjust 10
+	States
+	{
+		Spawn:
+			TNT1 A -1
+			Stop
+		Ready:
+			FRAP A 1 A_WeaponReady
+			loop
+		Select:
+			FRAP AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Raise
+			FRAP A 1 A_Raise
+			loop
+		Deselect:
+			FRAP AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Lower
+			FRAP A 1 A_Lower
+			loop
+		Fire:
+			TNT1 A 3 Offset(5, 36)
+			TNT1 A 0 A_JumpIfInventory("IsFighter",1,"FighterFire")
+			TNT1 A 0 A_JumpIfInventory("IsNinja",1,"NinjaFire")
+			TNT1 A 0 A_JumpIfInventory("IsThief",1,"ThiefFire")
+			TNT1 A 0 A_JumpIfInventory("IsRedMage",1,"RedMageFire")
+		FighterFire:
+			FRAP B 3 Offset(5, 36)
+			FRAP C 2 Offset(5, 36)
+			FRAP D 3 Offset(5, 36) A_CustomPunch(ACS_ExecuteWithResult(5,9), 1, 0, "WeaponHitPuff", 96)
+			Goto Finish
+		ThiefFire:
+			TRAP B 3 Offset(5, 36)
+			TRAP C 2 Offset(5, 36)
+			TRAP D 3 Offset(5, 36) A_CustomPunch(ACS_ExecuteWithResult(5,9), 1, 0, "WeaponHitPuff", 96)
+			Goto Finish
+		RedMageFire:
+			RRAP B 3 Offset(5, 36)
+			RRAP C 2 Offset(5, 36)
+			RRAP D 3 Offset(5, 36) A_CustomPunch(ACS_ExecuteWithResult(5,9), 1, 0, "WeaponHitPuff", 96)
+			Goto Finish
+		NinjaFire:
+			NRAP B 3 Offset(5, 36)
+			NRAP C 2 Offset(5, 36)
+			NRAP D 3 Offset(5, 36) A_CustomPunch(ACS_ExecuteWithResult(5,9), 1, 0, "WeaponHitPuff", 96)
+			Goto Finish
+		Finish:
+			FRAP E 2 Offset(5, 36) 
+			TNT1 A 2 Offset(5, 36)
+			TNT1 A 10 Offset(5, 150)
+			FRAP A 1 Offset(5, 60)
+			FRAP A 1 Offset(5, 55)
+			FRAP A 1 Offset(5, 50)
+			FRAP A 1 Offset(5, 45)
+			FRAP A 1 Offset(5, 40)
+			Goto Ready
+	}
+}
+
+Actor FF_IronHammerInventory : FF_Inventory
+{
+}
+
+Actor FF_IronHammer : Weapon
+{
+	// Damage 9
+	Weapon.YAdjust -10
+	States
+	{
+		Spawn:
+			TNT1 A -1
+			Stop
+		Ready:
+			FIHM A 1 A_WeaponReady
+			loop
+		Select:
+			FIHM AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Raise
+			FIHM A 1 A_Raise
+			loop
+		Deselect:
+			FIHM AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA 0 A_Lower
+			FIHM A 1 A_Lower
+			loop
+		Fire:
+			TNT1 A 3 Offset(5, 36)
+			TNT1 A 0 A_JumpIfInventory("IsFighter",1,"FighterFire")
+			TNT1 A 0 A_JumpIfInventory("IsNinja",1,"NinjaFire")
+			TNT1 A 0 A_JumpIfInventory("IsWhiteMage",1,"WhiteMageFire")
+		FighterFire:
+			FIHM B 6 Offset(5, 0)
+			FIHM C 3 Offset(5, 0) A_CustomPunch(ACS_ExecuteWithResult(5,9), 1, 0, "WeaponHitPuff", 112)
+			FIHM D 3 Offset(5, 0) 
+			Goto Finish
+		NinjaFire:
+			NIHM B 6 Offset(5, 0)
+			NIHM C 3 Offset(5, 0) A_CustomPunch(ACS_ExecuteWithResult(5,9), 1, 0, "WeaponHitPuff", 112)
+			NIHM D 3 Offset(5, 0) 
+			Goto Finish
+		WhiteMageFire:
+			WIHM B 6 Offset(5, 0)
+			WIHM C 3 Offset(5, 0) A_CustomPunch(ACS_ExecuteWithResult(5,9), 1, 0, "WeaponHitPuff", 112)
+			WIHM D 3 Offset(5, 0) 
+			Goto Finish
+		Finish:
+			FIHM E 2 Offset(5, 0) 
+			FIHM E 10 Offset(5, 150)
+			FIHM A 1 Offset(0, 60)
+			FIHM A 1 Offset(0, 55)
+			FIHM A 1 Offset(0, 50)
+			FIHM A 1 Offset(0, 45)
+			FIHM A 1 Offset(0, 40)
+			FIHM A 1 Offset(0, 35)
+			FIHM A 1
+			Goto Ready
+	}
+}
+
+Actor WeaponHitPuff : HammerPuff
+{
+	VSpeed 0
+	SeeSound "WeaponHitThing"
+	AttackSound "WeaponHitWall"
+	ActiveSound "WeaponMiss"
+}
+
+// - END WEAPONS -
+
+// - ARMOR -
+
+Actor FF_NoOffHand : FF_Inventory
+{
+}
+
+Actor FF_NoArmor : FF_Inventory
+{
+}
+
+Actor FF_NoHelm : FF_Inventory
+{
+}
+
+Actor FF_NoAcc : FF_Inventory
+{
+}
+
+Actor FF_ClothInventory : FF_Inventory
+{
+}
+
+Actor FF_WoodenArmorInventory : FF_Inventory
+{
+}
+
+Actor FF_ChainArmorInventory : FF_Inventory
+{
+}
+
+// - END ARMOR -

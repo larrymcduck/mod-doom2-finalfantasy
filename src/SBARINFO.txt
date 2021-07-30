@@ -1,0 +1,30 @@
+height 0;
+monospacefonts true, "0";
+//interpolatehealth false;
+Resolution 640, 400;
+
+statusbar fullscreen, fullscreenoffsets, forcescaled
+{
+	drawimage "SBAR-HP",2,-54;
+	drawnumber 3, FF_FONT1, untranslated, health, 38,-30;	
+	drawnumber 3, FF_FONT1, untranslated, MaxHpItem, 38,-22;
+}
+
+statusbar Normal, fullscreenoffsets, forcescaled
+{
+	drawimage "SBAR-HP",2,-54;
+	drawnumber 3, FF_FONT1, untranslated, health, 38,-30;
+	drawnumber 3, FF_FONT1, untranslated, MaxHpItem, 38,-22;
+}
+
+statusbar InventoryFullscreen
+{
+}
+
+statusbar inventory
+{
+}
+
+statusbar Automap
+{
+}

@@ -1,0 +1,25 @@
+alias choiceup "puke 201"
+alias choicedown "puke 202"
+alias choiceselect "puke 203"
+  
+defaultbind ENTER choiceselect
+defaultbind UPARROW choiceup
+defaultbind DOWNARROW choicedown
+ 
+addkeysection "Choice Menus" menus
+addmenukey "Menu Select" choiceselect
+addmenukey "Menu Up" choiceup
+addmenukey "Menu Down" choicedown
+
+alias openmenu "puke 204"
+defaultbind B openmenu
+addmenukey "Hero Menu" openmenu
+
+clearplayerclasses
+addplayerclass FF1_FighterClass
+addplayerclass FF1_ThiefClass
+addplayerclass FF1_BlackBeltClass
+addplayerclass FF1_RedMageClass
+addplayerclass FF1_WhiteMageClass
+addplayerclass FF1_BlackMageClass
+
